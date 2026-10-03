@@ -13,11 +13,13 @@
     <div class="brand"><img src="icon.svg" alt=""><span>Universal<br>Modder</span></div>
     <button class="nav active" data-view="chat"><span class="ico">💬</span>Chat</button>
     <button class="nav" data-view="games"><span class="ico">🎮</span>Games</button>
+    <button class="nav" data-view="art"><span class="ico">🎨</span>Art</button>
     <button class="nav" data-view="backups"><span class="ico">🗂️</span>Backups</button>
     <button class="nav" data-view="publish"><span class="ico">✅</span>Publish check</button>
     <button class="nav" data-view="settings"><span class="ico">⚙️</span>Settings</button>
     <div class="side-foot">
       <div class="status" id="ollama-status"><span class="dot"></span><span class="txt">Checking Ollama…</span></div>
+      <div class="status" id="comfy-status"><span class="dot"></span><span class="txt">Checking ComfyUI…</span></div>
       <div class="muted small" id="version"></div>
     </div>
   </nav>
@@ -30,6 +32,7 @@
         <div class="bar-right">
           <label class="muted small" for="model-pick">Model</label>
           <select id="model-pick"></select>
+          <span class="tag" id="mode-tag" hidden title="This model has no built-in tool calling, so the app describes the tools in text. It works, a bit less reliably.">text tools</span>
           <button class="btn ghost" id="new-chat">New chat</button>
         </div>
       </header>
@@ -39,9 +42,10 @@
           <p class="muted">The AI runs on your own Ollama and works with the toolkit: it finds your games, checks how they can be
             modded, backs up your saves, writes mod files into your workspace, and asks before anything risky.</p>
           <div class="chips">
+            <button class="chip">What could I add to the games I own?</button>
             <button class="chip">What games do I have, and which are easiest to mod?</button>
             <button class="chip">Scan Terraria and tell me the best way to mod it</button>
-            <button class="chip">Back up my saves for Stardew Valley</button>
+            <button class="chip">Make a pixel-art sword sprite for Terraria</button>
             <button class="chip">Help me make a new sword for Terraria</button>
           </div>
         </div>
@@ -70,6 +74,37 @@
           <div class="empty muted">Pick a game to see its engine, anti-cheat, mod loaders, save folders and the best way to mod it.</div>
         </div>
       </div>
+    </section>
+
+    <!-- Art -->
+    <section class="view" id="view-art">
+      <header class="bar">
+        <h1>Art</h1>
+        <div class="bar-right"><button class="btn ghost" id="art-refresh">Refresh</button><button class="btn ghost" id="art-open">Open art folder</button></div>
+      </header>
+      <div class="panel form" id="comfy-setup"></div>
+      <div class="panel form">
+        <h3>Make an image</h3>
+        <textarea id="art-prompt" rows="3" placeholder="What to draw, e.g. a rusty golden hoe with glowing runes"></textarea>
+        <div class="row">
+          <select id="art-style">
+            <option value="item">Game item / icon (plain background)</option>
+            <option value="character">Character, full body, T-pose</option>
+            <option value="texture">Seamless texture</option>
+            <option value="none">Exactly as I wrote it</option>
+          </select>
+          <select id="art-size">
+            <option value="768x768">768 × 768 (faster)</option>
+            <option value="1024x1024" selected>1024 × 1024</option>
+            <option value="1024x768">1024 × 768 (wide)</option>
+            <option value="768x1024">768 × 1024 (tall)</option>
+          </select>
+          <input id="art-name" placeholder="File name (optional)">
+          <button class="btn primary" id="art-go">Generate</button>
+        </div>
+        <p class="muted small" id="art-progress"></p>
+      </div>
+      <div id="art-gallery" class="gallery"></div>
     </section>
 
     <!-- Backups -->
@@ -118,8 +153,8 @@
       <header class="bar"><h1>Settings</h1></header>
       <div class="panel form">
         <h3>AI model (Ollama)</h3>
-        <p class="muted small">Install Ollama from <b>ollama.com</b>, then pull a model that supports tools, for example
-          <code>ollama pull qwen3-coder</code> (needs a strong GPU) or <code>ollama pull qwen3:8b</code> (smaller).</p>
+        <p class="muted small">Any model in your Ollama works. Models with built-in tool calling (qwen3, llama3.1, …) are the most
+          reliable; models without it, like Gemma 3 or your own GGUF imports, get the tools as text instructions automatically.</p>
         <label>Ollama address</label>
         <div class="row"><input id="set-url" placeholder="http://localhost:11434"><button class="btn ghost" id="set-test">Test</button></div>
         <label>Model</label>
@@ -134,7 +169,20 @@
             <option value="131072">128k (lots of memory)</option>
           </select>
         </div>
-        <p class="muted small">Bigger context lets the AI keep more of the guides and files in mind, but uses more GPU memory.</p>
+        <p class="muted small">Bigger context lets the AI keep more of the guides and files in mind, but uses more GPU memory.
+          On an 8 GB card, 8k is a good start; past what fits, Ollama spills to the CPU and gets 2–3× slower.</p>
+        <label>Tools</label>
+        <div class="row">
+          <select id="set-mode">
+            <option value="auto">Automatic (recommended)</option>
+            <option value="native">Built-in tool calling (qwen3, llama3.1, …)</option>
+            <option value="text">Text tools (Gemma 3 and other models without tool calling)</option>
+          </select>
+        </div>
+        <h3>Art (ComfyUI)</h3>
+        <label>ComfyUI address</label>
+        <div class="row"><input id="set-comfy" placeholder="http://127.0.0.1:8188"></div>
+        <label class="check"><input type="checkbox" id="set-free"> Free GPU memory between chat and art (recommended for 8 GB cards)</label>
         <h3>Workspace</h3>
         <p class="muted small">Where the AI writes new mod files without asking. Writing anywhere else needs your OK.</p>
         <div class="row">
@@ -148,6 +196,7 @@
   </main>
 </div>
 
+<dialog id="viewer"><form method="dialog"><img alt=""><div class="row end"><button class="btn ghost">Close</button></div></form></dialog>
 <dialog id="confirm">
   <form method="dialog">
     <h3 id="confirm-title"></h3>

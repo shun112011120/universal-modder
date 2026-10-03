@@ -19,6 +19,7 @@
 }
 
 * { box-sizing: border-box; }
+[hidden] { display: none !important; }
 html, body { margin: 0; height: 100%; }
 body {
   background: var(--bg);
@@ -149,6 +150,27 @@ label { display: block; font-size: 13px; color: var(--muted); margin: 12px 0 4px
 .routes li { margin-bottom: 6px; }
 .warn-box { border: 1px solid #6B5320; background: #1E1709; color: #FFD58A; border-radius: 9px; padding: 8px 12px; margin-top: 8px; font-size: 14px; }
 .warn-box.bad { border-color: #6B2B2B; background: #1F0D0D; color: #FFB3B3; }
+
+/* art */
+.gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px; max-width: 1100px; }
+.art { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; display: flex; flex-direction: column; }
+.art .pic { aspect-ratio: 1; display: grid; place-items: center; cursor: zoom-in;
+            background: repeating-conic-gradient(#1a2029 0% 25%, #12171e 0% 50%) 50% / 20px 20px; }
+.art .pic img { max-width: 100%; max-height: 100%; image-rendering: auto; }
+.art .pic img.px { image-rendering: pixelated; width: 70%; }
+.art .meta { padding: 8px 10px; display: flex; flex-direction: column; gap: 6px; font-size: 13px; }
+.art .meta .nm { font-family: var(--mono); overflow-wrap: anywhere; }
+.art .acts { display: flex; flex-wrap: wrap; gap: 6px; }
+.sprite-form { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+.sprite-form input { width: 86px; padding: 4px 8px; }
+.tool-img { display: block; max-width: 260px; max-height: 260px; margin: 8px 12px 10px; border-radius: 8px;
+            background: repeating-conic-gradient(#1a2029 0% 25%, #12171e 0% 50%) 50% / 16px 16px; }
+textarea#art-prompt { width: 100%; resize: vertical; }
+label.check { display: flex; gap: 8px; align-items: center; color: var(--text); font-size: 14px; margin-top: 12px; }
+label.check input { width: auto; }
+#viewer { max-width: 92vw; max-height: 92vh; padding: 10px; }
+#viewer img { max-width: 88vw; max-height: 84vh; display: block; }
+#viewer img.px { width: min(512px, 80vw); height: auto; image-rendering: pixelated; }
 
 /* backups */
 .bk-group h3 { display: flex; align-items: center; gap: 10px; }

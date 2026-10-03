@@ -9,12 +9,13 @@ Everything lives in this one folder. Put it on your Desktop (or anywhere) and ke
 
 1. Double-click UniversalModder.exe. The app opens in its own window (it uses Microsoft Edge, which Windows
    already has). Closing the window quits the app.
-2. For the AI chat, install Ollama from https://ollama.com and pull a model that supports tools, e.g.
-       ollama pull qwen3-coder      (strong GPU, ~24 GB of VRAM)
-       ollama pull qwen3:8b         (smaller GPUs)
-   Then pick the model in Settings. Ollama is its own program, so it and its models are installed outside
-   this folder.
-3. The Games, Backups and Publish check screens work without Ollama.
+2. For the AI chat, install Ollama from https://ollama.com and pick any of its models in Settings. Models
+   with tool calling (qwen3, llama3.1, ...) are the most reliable; others, like Gemma 3 or your own GGUF
+   imports, get the tools as text instructions automatically. On an 8 GB GPU set Context size to 8k.
+   Ollama is its own program, so it and its models are installed outside this folder.
+3. For art, start your ComfyUI, make one image the way you normally do, then on the Art screen click
+   "Use my last ComfyUI image". The app reuses that workflow and only changes the prompt, size and seed.
+4. The Games, Backups and Publish check screens work without Ollama or ComfyUI.
 
 Windows may warn that the app is from an unknown publisher (it isn't code-signed): click "More info", then
 "Run anyway".

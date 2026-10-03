@@ -60,6 +60,17 @@ async function busy(btn, fn) {
   finally { btn.disabled = false; btn.textContent = label; }
 }
 
+const imgURL = (path) => `/api/file?path=${encodeURIComponent(path)}&t=${encodeURIComponent(TOKEN)}&v=${Date.now()}`;
+
+function viewImage(path) {
+  const d = $("#viewer");
+  const img = $("img", d);
+  img.className = "";
+  img.onload = () => { if (img.naturalWidth < 256) img.className = "px"; };   // blow small sprites up, crisp
+  img.src = imgURL(path);
+  d.showModal();
+}
+
 const fmtBytes = (n) => n > 1 << 30 ? (n / 2 ** 30).toFixed(1) + " GB" : n > 1 << 20 ? (n / 2 ** 20).toFixed(1) + " MB" : Math.max(1, Math.round(n / 1024)) + " KB";
 
 function fmtStamp(s) {   // 20261003-214512 -> 2026-10-03 21:45
@@ -102,10 +113,12 @@ function show(view) {
   $$(".nav").forEach((b) => b.classList.toggle("active", b.dataset.view === view));
   $$(".view").forEach((v) => v.classList.toggle("active", v.id === "view-" + view));
   if (view === "backups") loadBackups();
+  if (view === "art") loadArt();
   if (view === "settings") fillSettings();
 }
 $$(".nav").forEach((b) => b.addEventListener("click", () => show(b.dataset.view)));
 $("#ollama-status").addEventListener("click", () => show("settings"));
+$("#comfy-status").addEventListener("click", () => show("art"));
 
 async function refreshStatus() {
   try {
@@ -120,6 +133,11 @@ async function refreshStatus() {
   st.classList.toggle("ok", STATUS.ollama.ok && !!cfg.model);
   st.classList.toggle("bad", !STATUS.ollama.ok);
   $(".txt", st).textContent = !STATUS.ollama.ok ? "Ollama not running" : cfg.model ? cfg.model : "Pick a model";
+  const cs = $("#comfy-status");
+  cs.classList.toggle("ok", STATUS.comfy.running && STATUS.comfy.template);
+  cs.classList.toggle("bad", !STATUS.comfy.running);
+  $(".txt", cs).textContent = !STATUS.comfy.running ? "ComfyUI not running" : STATUS.comfy.template ? "ComfyUI ready" : "ComfyUI: set up art";
+  $("#mode-tag").hidden = STATUS.ollama.tool_mode !== "text";
   const key = JSON.stringify([cfg.model, STATUS.ollama.ok, STATUS.ollama.models.map((m) => m.name)]);
   if (key === refreshStatus.key) return;          // don't reset a dropdown the user is in the middle of changing
   refreshStatus.key = key;
@@ -227,6 +245,8 @@ async function send(text) {
           textBuf += ev.text;
           partial += ev.text;
           textEl.innerHTML = md(textBuf);
+        } else if (ev.type === "mode") {
+          $("#mode-tag").hidden = ev.mode !== "text";
         } else if (ev.type === "thinking") {
           typing.textContent = "Thinking";
         } else if (ev.type === "tool") {
@@ -252,6 +272,14 @@ async function send(text) {
             st.className = "state " + (ev.ok ? "ok" : "err");
             st.textContent = ev.ok ? "✓" : /^The user denied/.test(ev.text) ? "denied" : "✗";
             card.append(h("pre", {}, ev.text));
+            if (ev.ok && (ev.name === "generate_image" || ev.name === "make_sprite")) {
+              try {
+                const r = JSON.parse(ev.text);
+                for (const f of r.files || [r.output]) {
+                  if (f) turn.insertBefore(h("img", { class: "tool-img", src: imgURL(f), title: f, onclick: () => viewImage(f) }), typing);
+                }
+              } catch { /* not JSON: nothing to preview */ }
+            }
           }
           typing.textContent = "Thinking";
         } else if (ev.type === "done") {
@@ -397,6 +425,91 @@ function renderReport(r) {
   ));
 }
 
+// ------------------------------------------------------------------ art
+
+async function loadArt() {
+  const box = $("#comfy-setup");
+  let st;
+  try { st = await tool("comfy_status"); }
+  catch (e) { box.replaceChildren(h("div", { class: "error-msg" }, e.message)); return; }
+  const kids = [h("h3", {}, "ComfyUI")];
+  kids.push(h("p", { class: "small " + (st.running ? "muted" : "") }, st.running ? `Running at ${st.url}.`
+    : `Not running at ${st.url}. Start ComfyUI (your ComfyUI.bat) and keep its window open, then click Refresh.`));
+  if (st.template) {
+    kids.push(h("p", { class: "muted small" }, `Using your workflow from ${st.template.source} (saved ${st.template.saved.replace("T", " ")}). `
+      + `Nodes: ${st.template.nodes.join(", ")}.`));
+  } else {
+    kids.push(h("p", { class: "small" }, "To set it up, make one image the way you normally do in ComfyUI, then click the button below. "
+      + "The app reuses that exact workflow (your models and settings) and only changes the prompt, size and seed."));
+  }
+  kids.push(h("div", { class: "row" },
+    h("button", { class: "btn " + (st.template ? "ghost" : "primary"), disabled: !st.running, onclick: (e) => busy(e.target, async () => {
+      await tool("comfy_use_last"); toast("Workflow saved", "ok"); loadArt(); refreshStatus();
+    }) }, st.template ? "Use my last ComfyUI image again" : "Use my last ComfyUI image"),
+    h("button", { class: "btn ghost", onclick: async () => {
+      const r = await api("/api/pick-file", { title: "Choose an API-format workflow (.json)" });
+      if (!r.ok) return toast(r.error, "err");
+      if (!r.path) return;
+      try { await tool("comfy_load_workflow", { path: r.path }); toast("Workflow loaded", "ok"); loadArt(); refreshStatus(); }
+      catch (e) { toast(e.message, "err"); }
+    } }, "Load workflow file…")));
+  box.replaceChildren(...kids);
+  $("#art-go").disabled = !(st.running && st.template);
+  loadGallery();
+}
+
+async function loadGallery() {
+  const gal = $("#art-gallery");
+  let items;
+  try { items = await tool("list_art"); } catch (e) { toast(e.message, "err"); return; }
+  if (!items.length) { gal.replaceChildren(h("div", { class: "panel empty muted" }, "Your images will show up here.")); return; }
+  gal.replaceChildren(...items.map(artCard));
+}
+
+function artCard(it) {
+  const small = /_sprite_/.test(it.name);
+  const form = h("div", { class: "sprite-form", hidden: true },
+    h("input", { placeholder: "32x32", value: "32x32", title: "Sprite size in pixels" }),
+    h("label", { class: "check small", style: "margin:0" }, h("input", { type: "checkbox", checked: true }), "pixel art"),
+    h("input", { placeholder: "colours", value: "16", title: "Colours (pixel art)", style: "width:64px" }),
+    h("button", { class: "btn sm primary", onclick: (e) => busy(e.target, async () => {
+      const [size, pix, colors] = form.querySelectorAll("input");
+      const r = await tool("make_sprite", { image: it.path, size: size.value.trim(), pixel_art: pix.checked ? "yes" : "no", colors: colors.value });
+      toast(`Sprite: ${r.steps.join(", ")}`, "ok");
+      loadGallery();
+    }) }, "Make"));
+  return h("div", { class: "art" },
+    h("div", { class: "pic", onclick: () => viewImage(it.path) }, h("img", { src: imgURL(it.path), class: small ? "px" : "", alt: it.name, loading: "lazy" })),
+    h("div", { class: "meta" },
+      h("span", { class: "nm" }, it.name),
+      h("div", { class: "acts" },
+        h("button", { class: "btn sm", onclick: () => { form.hidden = !form.hidden; } }, "Make sprite…"),
+        h("button", { class: "btn sm ghost", onclick: () => askAI(`Use the image ${it.path} in my mod: `) }, "Use in chat")),
+      form));
+}
+
+$("#art-refresh").addEventListener("click", loadArt);
+$("#art-open").addEventListener("click", async () => {
+  const r = await api("/api/open-folder", { path: (STATUS?.config.workspace || "") + "/art" });
+  if (!r.ok) toast("No art yet: generate an image first.", "err");
+});
+$("#art-go").addEventListener("click", (e) => busy(e.target, async () => {
+  const prompt = $("#art-prompt").value.trim();
+  if (!prompt) throw new Error("Describe what to draw.");
+  const prog = $("#art-progress");
+  const t0 = Date.now();
+  const timer = setInterval(() => {
+    const s = Math.round((Date.now() - t0) / 1000);
+    prog.textContent = `Generating… ${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")} (usually 3–6 minutes on an 8 GB card; keep ComfyUI open)`;
+  }, 1000);
+  try {
+    const r = await tool("generate_image", { prompt, style: $("#art-style").value, size: $("#art-size").value, name: $("#art-name").value.trim() });
+    prog.textContent = `Done in ${Math.round(r.seconds / 60 * 10) / 10} min.`;
+    toast("Image ready", "ok");
+    loadGallery();
+  } finally { clearInterval(timer); }
+}));
+
 // ------------------------------------------------------------------ backups
 
 async function loadBackups() {
@@ -471,6 +584,9 @@ function fillSettings() {
   if (!STATUS) return;
   const c = STATUS.config;
   $("#set-url").value = c.ollama_url;
+  $("#set-mode").value = c.tool_mode || "auto";
+  $("#set-comfy").value = c.comfy_url;
+  $("#set-free").checked = !!c.free_vram;
   $("#set-ws").value = c.workspace;
   const ctx = $("#set-ctx");
   if (![...ctx.options].some((o) => +o.value === c.num_ctx)) ctx.append(h("option", { value: c.num_ctx }, `${Math.round(c.num_ctx / 1024)}k`));
@@ -479,7 +595,10 @@ function fillSettings() {
 }
 
 async function saveSettings() {
-  const r = await api("/api/config", { ollama_url: $("#set-url").value, model: $("#set-model").value, num_ctx: +$("#set-ctx").value, workspace: $("#set-ws").value });
+  const r = await api("/api/config", {
+    ollama_url: $("#set-url").value, model: $("#set-model").value, num_ctx: +$("#set-ctx").value, workspace: $("#set-ws").value,
+    tool_mode: $("#set-mode").value, comfy_url: $("#set-comfy").value, free_vram: $("#set-free").checked,
+  });
   if (!r.ok) throw new Error(r.error);
   await refreshStatus();
   fillSettings();

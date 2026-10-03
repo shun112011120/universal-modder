@@ -20,8 +20,8 @@ from um import app  # noqa: E402
 class FakeOllama:
     """Streams scripted /api/chat replies (one list of chunks per request) and records what it was sent."""
 
-    def __init__(self, replies):
-        self.replies, self.requests = list(replies), []
+    def __init__(self, replies, caps=("completion", "tools")):
+        self.replies, self.requests, self.caps, self.unloaded = list(replies), [], list(caps), []
         fake = self
 
         class H(BaseHTTPRequestHandler):
@@ -35,8 +35,21 @@ class FakeOllama:
                 self.end_headers()
                 self.wfile.write(body)
 
+            def _json(self, obj):
+                body = json.dumps(obj).encode()
+                self.send_response(200)
+                self.send_header("Content-Length", str(len(body)))
+                self.end_headers()
+                self.wfile.write(body)
+
             def do_POST(self):
-                fake.requests.append(json.loads(self.rfile.read(int(self.headers["Content-Length"]))))
+                body = json.loads(self.rfile.read(int(self.headers["Content-Length"])))
+                if self.path == "/api/show":
+                    return self._json({"capabilities": fake.caps})
+                if self.path == "/api/generate":
+                    fake.unloaded.append(body)
+                    return self._json({})
+                fake.requests.append(body)
                 chunks = fake.replies.pop(0)
                 self.send_response(200)
                 self.send_header("Content-Type", "application/x-ndjson")
@@ -71,7 +84,8 @@ def home(tmp_path, monkeypatch):
 
 def test_tool_schemas_are_complete():
     schemas = app.tool_schemas()
-    assert [s["function"]["name"] for s in schemas] == list(app.TOOLS)
+    assert [s["function"]["name"] for s in schemas] == [t for t in app.TOOLS if t not in app.SCREEN_ONLY]
+    assert "generate_image" in app.text_tools_prompt() and "comfy_use_last" not in app.text_tools_prompt()
     for s in schemas:
         params = s["function"]["parameters"]
         assert set(params["required"]) <= set(params["properties"])
@@ -99,6 +113,7 @@ def test_chat_runs_tools_and_streams(home):
     assert (home / "ws" / "MyMod" / "build.txt").read_text() == "ok"
     types = [e["type"] for e in events]
     assert types.count("tool") == 2 and types.count("tool_result") == 2 and "approve" not in types
+    assert {"type": "mode", "mode": "native"} in events
     assert "".join(e["text"] for e in events if e["type"] == "delta") == "All done."
     assert [m["role"] for m in new] == ["assistant", "tool", "assistant", "tool", "assistant"]
     assert new[1]["content"] == "hello mod" and new[1]["tool_name"] == "read_file"
@@ -188,3 +203,148 @@ def test_portable_keeps_everything_in_the_app_folder(tmp_path, monkeypatch):
     assert common.data_dir() == tmp_path / "Universal Modder" / "data"
     assert app.config_path().parent == tmp_path / "Universal Modder" / "data"
     assert app.load_config()["workspace"] == str(tmp_path / "Universal Modder" / "My Mods")
+
+
+# --------------------------------------------------------------------------- text tools (models without tool calling, e.g. Gemma 3)
+
+def test_parse_text_call_variants():
+    assert app.parse_text_call('Let me look.\n<tool>{"name": "scan_game", "arguments": {"game": "Terraria"}}</tool>') == \
+        ("Let me look.", "scan_game", {"game": "Terraria"})
+    assert app.parse_text_call('```json\n{"name": "list_games", "arguments": {}}\n```')[1] == "list_games"
+    assert app.parse_text_call('{"tool": "kb_search", "args": {"query": "unity"}}')[1:] == ("kb_search", {"query": "unity"})
+    assert app.parse_text_call('<tool>{"name": "read_file", "arguments": "{\\"path\\": \\"a.txt\\"}"}</tool>')[2] == {"path": "a.txt"}
+    assert app.parse_text_call("Here is C#:\n```cs\nclass A {}\n```") is None          # code is not a tool call
+    assert app.parse_text_call('<tool>{"name": "rm_rf", "arguments": {}}</tool>') is None  # unknown tools are ignored
+    assert app.parse_text_call('<tool>{"name": "comfy_use_last", "arguments": {}}</tool>') is None
+
+
+def test_chat_uses_text_tools_for_models_without_tool_calling(home):
+    (home / "ws").mkdir(exist_ok=True)
+    (home / "ws" / "notes.txt").write_text("hello mod")
+    fake = FakeOllama([say('I will read it.\n<tool>{"name": "read_|file", "arguments": {"path": "notes.txt"}}</tool>'), say("It says |hello mod.")],
+                      caps=["completion"])
+    events = []
+    try:
+        new = app.chat_turn([{"role": "user", "content": "read my notes"}], events.append, dict(app.load_config(), ollama_url=fake.url))
+    finally:
+        fake.close()
+    shown = "".join(e["text"] for e in events if e["type"] == "delta")
+    assert "<tool>" not in shown and "I will read it." in shown and shown.endswith("It says hello mod.")
+    assert {"type": "mode", "mode": "text"} in events
+    assert all("tools" not in r for r in fake.requests)
+    assert "<tool>" in fake.requests[0]["messages"][0]["content"]                       # tools described in the prompt
+    assert new[1] == {"role": "user", "content": '<tool_result name="read_file">\nhello mod\n</tool_result>'}
+    assert next(e for e in events if e["type"] == "tool_result")["ok"]
+
+
+def test_tool_results_shrink_with_small_context():
+    assert app.result_limit(4096) < app.result_limit(8192) < app.result_limit(65536) == app.MAX_TOOL_CHARS
+    assert app.as_text("x" * 5000, 2000).startswith("x" * 2000) and "more characters cut" in app.as_text("x" * 5000, 2000)
+
+
+# --------------------------------------------------------------------------- art (ComfyUI)
+
+QWEN_GRAPH = {  # shaped like a Qwen-Image GGUF workflow: one encoder feeds both positive and negative
+    "1": {"class_type": "UnetLoaderGGUF", "inputs": {"unet_name": "qwen-image.gguf"}},
+    "2": {"class_type": "CLIPLoader", "inputs": {"clip_name": "qwen3vl.safetensors", "type": "qwen_image"}},
+    "3": {"class_type": "TextEncodeQwenImage21", "inputs": {"clip": ["2", 0], "prompt": "a ghoul in a T-pose", "resolution": 1024}},
+    "4": {"class_type": "EmptyLatentImage", "inputs": {"width": 768, "height": 768, "batch_size": 1}},
+    "5": {"class_type": "KSampler", "inputs": {"model": ["1", 0], "positive": ["3", 0], "negative": ["3", 1], "latent_image": ["4", 0],
+                                               "seed": 42, "steps": 20, "cfg": 1.0, "sampler_name": "euler", "scheduler": "simple", "denoise": 1.0}},
+    "6": {"class_type": "VAEDecode", "inputs": {"samples": ["5", 0], "vae": ["7", 0]}},
+    "7": {"class_type": "VAELoader", "inputs": {"vae_name": "qwen_vae.safetensors"}},
+    "8": {"class_type": "SaveImage", "inputs": {"images": ["6", 0], "filename_prefix": "ghoul_tpose"}},
+}
+
+
+def test_fill_workflow_sets_prompt_size_seed_and_prefix():
+    g = app.fill_workflow(QWEN_GRAPH, "a golden hoe", 1024, 512, 7, "golden_hoe")
+    assert g["3"]["inputs"]["prompt"] == "a golden hoe" and g["3"]["inputs"]["clip"] == ["2", 0]
+    assert (g["4"]["inputs"]["width"], g["4"]["inputs"]["height"]) == (1024, 512)
+    assert g["5"]["inputs"]["seed"] == 7 and g["8"]["inputs"]["filename_prefix"] == "universal-modder/golden_hoe"
+    assert QWEN_GRAPH["3"]["inputs"]["prompt"] == "a ghoul in a T-pose"                   # the template is untouched
+    classic = {"1": {"class_type": "CLIPTextEncode", "inputs": {"text": "neg"}}, "2": {"class_type": "CLIPTextEncode", "inputs": {"text": "pos"}},
+               "3": {"class_type": "KSampler", "inputs": {"positive": ["2", 0], "negative": ["1", 0], "seed": 1}},
+               "4": {"class_type": "SaveImage", "inputs": {}}}
+    g = app.fill_workflow(classic, "sword", 512, 512, 3, "s")
+    assert g["2"]["inputs"]["text"] == "sword" and g["1"]["inputs"]["text"] == "neg"
+
+
+class FakeComfy:
+    def __init__(self, png: bytes):
+        self.prompts, self.freed = [], 0
+        fake = self
+
+        class H(BaseHTTPRequestHandler):
+            def log_message(self, *a):
+                pass
+
+            def _send(self, body, ctype="application/json"):
+                body = body if isinstance(body, bytes) else json.dumps(body).encode()
+                self.send_response(200)
+                self.send_header("Content-Type", ctype)
+                self.send_header("Content-Length", str(len(body)))
+                self.end_headers()
+                self.wfile.write(body)
+
+            def do_GET(self):
+                if self.path.startswith("/system_stats"):
+                    return self._send({"system": {}})
+                if self.path.startswith("/history/"):
+                    pid = self.path.rsplit("/", 1)[1]
+                    return self._send({pid: {"status": {"status_str": "success", "completed": True},
+                                             "outputs": {"8": {"images": [{"filename": "x_00001_.png", "subfolder": "universal-modder", "type": "output"}]}}}})
+                if self.path.startswith("/history"):
+                    edit = json.loads(json.dumps(QWEN_GRAPH))
+                    edit["9"] = {"class_type": "LoadImage", "inputs": {"image": "a.png"}}
+                    return self._send({"old": {"prompt": [1, "old", QWEN_GRAPH, {}, ["8"]], "status": {"status_str": "success"}},
+                                       "newer-edit": {"prompt": [2, "newer-edit", edit, {}, ["8"]], "status": {"status_str": "success"}}})
+                if self.path.startswith("/view"):
+                    return self._send(png, "image/png")
+
+            def do_POST(self):
+                body = json.loads(self.rfile.read(int(self.headers["Content-Length"])))
+                if self.path == "/prompt":
+                    fake.prompts.append(body["prompt"])
+                    return self._send({"prompt_id": "p1"})
+                if self.path == "/free":
+                    fake.freed += 1
+                    return self._send({})
+
+        self.httpd = ThreadingHTTPServer(("127.0.0.1", 0), H)
+        self.url = f"http://127.0.0.1:{self.httpd.server_address[1]}"
+        threading.Thread(target=self.httpd.serve_forever, daemon=True).start()
+
+    def close(self):
+        self.httpd.shutdown()
+
+
+def test_art_from_comfy_history_to_sprite(home):
+    import io
+    from PIL import Image
+    im = Image.new("RGB", (256, 256), (200, 200, 200))
+    for x in range(96, 160):
+        for y in range(64, 192):
+            im.putpixel((x, y), (200, 160, 30))
+    buf = io.BytesIO()
+    im.save(buf, "PNG")
+    comfy, ollama = FakeComfy(buf.getvalue()), FakeOllama([])
+    app.save_config({"comfy_url": comfy.url, "ollama_url": ollama.url})
+    try:
+        with pytest.raises(app.ToolError, match="no ComfyUI workflow"):
+            app.call_tool("generate_image", {"prompt": "a golden hoe"})
+        st = app.call_tool("comfy_use_last", {})
+        assert st["running"] and "TextEncodeQwenImage21" in st["template"]["nodes"] and "LoadImage" not in st["template"]["nodes"]
+        res = app.call_tool("generate_image", {"prompt": "a golden hoe", "name": "golden hoe", "size": "768x768"})
+        sent = comfy.prompts[0]
+        assert sent["3"]["inputs"]["prompt"].startswith("a golden hoe, a single game item") and sent["4"]["inputs"]["width"] == 768
+        assert ollama.unloaded == [{"model": "fake-model:7b", "keep_alive": 0}] and comfy.freed == 1   # 8 GB cards: one at a time
+        art = Path(res["files"][0])
+        assert art.parent == home / "ws" / "art" and art.name == "golden_hoe.png" and art.read_bytes() == buf.getvalue()
+        assert app.call_tool("list_art", {})[0]["name"] == "golden_hoe.png"
+        sprite = app.call_tool("make_sprite", {"image": str(art), "size": "32x32", "colors": "8"})
+        out = Image.open(sprite["output"])
+        assert out.size == (32, 32) and out.mode == "RGBA" and out.getpixel((0, 0))[3] == 0      # background cut out
+    finally:
+        comfy.close()
+        ollama.close()

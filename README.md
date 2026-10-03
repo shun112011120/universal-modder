@@ -54,9 +54,14 @@ Windows games are driven natively or from WSL.
 ## The desktop app
 
 Prefer clicking to typing? **Universal Modder** is a desktop app on top of the same toolkit:
-- **Chat:** an AI on your own [Ollama](https://ollama.com) that mods games with the toolkit. It scans your
-  games, reads the knowledge base and the engine playbooks, backs up saves, writes mod files into a workspace
-  folder, and asks before it runs a command, restores a backup or writes anywhere else.
+- **Chat:** an AI on your own [Ollama](https://ollama.com) that mods the games you own with the toolkit. It knows
+  what's installed, suggests mods that fit each game, reads the knowledge base and the engine playbooks, backs up
+  saves, writes mod files into a workspace folder and makes their art, and asks before it runs a command,
+  restores a backup or writes anywhere else. Any Ollama model works: models with tool calling use it, and
+  models without it (Gemma 3, your own GGUF imports) get the tools as text instructions automatically.
+- **Art:** runs a [ComfyUI](https://github.com/comfyanonymous/ComfyUI) workflow you already use (one click takes
+  it from ComfyUI's history), filling in the prompt, size and seed, then cuts out, fits and pixelates the result
+  into a game sprite. On 8 GB cards it unloads the chat model first and frees ComfyUI's memory after.
 - **Games:** your Steam/Epic/Xbox games, each with its engine, anti-cheat, mod loaders, save folders and the
   best way to mod it.
 - **Backups:** snapshot save folders, see what changed, restore.
@@ -68,8 +73,8 @@ Prefer clicking to typing? **Universal Modder** is a desktop app on top of the s
 into the folder. Both are portable: settings, backups, the app window's browser data and your mods (`My Mods`)
 stay inside the folder, so moving or deleting the folder moves or removes everything. `um app` runs it on any OS.
 
-For the chat, pull a model that supports tool calling (`ollama pull qwen3-coder` on a strong GPU, `qwen3:8b` on
-smaller ones) and pick it in Settings. Everything stays on your PC: the window talks to a server on 127.0.0.1
+For the chat, pick any Ollama model in Settings; ones with tool calling (`qwen3-coder` on a strong GPU, `qwen3:8b`
+on smaller ones) are the most reliable. Everything stays on your PC: the window talks to a server on 127.0.0.1
 with a per-launch token.
 
 ## Try it
