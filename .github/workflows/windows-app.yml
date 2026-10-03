@@ -1,9 +1,9 @@
 name: windows app
 on:
   push:
-    paths: ["um/**", "packaging/**", "skills/**", "knowledge/**", "tests/test_app.py", "pyproject.toml", ".github/workflows/windows-app.yml"]
+    paths: ["um/**", "packaging/**", "skills/**", "knowledge/**", "tests/test_app.py", "pyproject.toml", "Universal Modder.cmd", ".github/workflows/windows-app.yml"]
   pull_request:
-    paths: ["um/**", "packaging/**", "skills/**", "knowledge/**", "tests/test_app.py", "pyproject.toml", ".github/workflows/windows-app.yml"]
+    paths: ["um/**", "packaging/**", "skills/**", "knowledge/**", "tests/test_app.py", "pyproject.toml", "Universal Modder.cmd", ".github/workflows/windows-app.yml"]
   workflow_dispatch:
 jobs:
   build:
