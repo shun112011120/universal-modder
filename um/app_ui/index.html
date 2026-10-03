@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Universal Modder</title>
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="app.css">
+</head>
+<body>
+<div class="shell">
+  <nav class="side">
+    <div class="brand"><img src="icon.svg" alt=""><span>Universal<br>Modder</span></div>
+    <button class="nav active" data-view="chat"><span class="ico">💬</span>Chat</button>
+    <button class="nav" data-view="games"><span class="ico">🎮</span>Games</button>
+    <button class="nav" data-view="backups"><span class="ico">🗂️</span>Backups</button>
+    <button class="nav" data-view="publish"><span class="ico">✅</span>Publish check</button>
+    <button class="nav" data-view="settings"><span class="ico">⚙️</span>Settings</button>
+    <div class="side-foot">
+      <div class="status" id="ollama-status"><span class="dot"></span><span class="txt">Checking Ollama…</span></div>
+      <div class="muted small" id="version"></div>
+    </div>
+  </nav>
+
+  <main>
+    <!-- Chat -->
+    <section class="view active" id="view-chat">
+      <header class="bar">
+        <h1>Chat</h1>
+        <div class="bar-right">
+          <label class="muted small" for="model-pick">Model</label>
+          <select id="model-pick"></select>
+          <button class="btn ghost" id="new-chat">New chat</button>
+        </div>
+      </header>
+      <div class="chat" id="chat">
+        <div class="welcome" id="welcome">
+          <h2>What do you want to mod?</h2>
+          <p class="muted">The AI runs on your own Ollama and works with the toolkit: it finds your games, checks how they can be
+            modded, backs up your saves, writes mod files into your workspace, and asks before anything risky.</p>
+          <div class="chips">
+            <button class="chip">What games do I have, and which are easiest to mod?</button>
+            <button class="chip">Scan Terraria and tell me the best way to mod it</button>
+            <button class="chip">Back up my saves for Stardew Valley</button>
+            <button class="chip">Help me make a new sword for Terraria</button>
+          </div>
+        </div>
+      </div>
+      <form class="composer" id="composer">
+        <textarea id="prompt" rows="1" placeholder="Ask the AI to mod a game… (Enter to send, Shift+Enter for a new line)"></textarea>
+        <button class="btn primary" id="send" type="submit">Send</button>
+      </form>
+    </section>
+
+    <!-- Games -->
+    <section class="view" id="view-games">
+      <header class="bar">
+        <h1>Games</h1>
+        <div class="bar-right">
+          <input id="game-filter" type="search" placeholder="Filter…">
+          <button class="btn ghost" id="scan-folder">Scan a folder…</button>
+          <button class="btn primary" id="find-games">Find my games</button>
+        </div>
+      </header>
+      <div class="split">
+        <div class="panel list-panel">
+          <div id="games-list" class="empty muted">Click <b>Find my games</b> to list your Steam, Epic and Xbox games.</div>
+        </div>
+        <div class="panel detail-panel" id="scan-panel">
+          <div class="empty muted">Pick a game to see its engine, anti-cheat, mod loaders, save folders and the best way to mod it.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Backups -->
+    <section class="view" id="view-backups">
+      <header class="bar">
+        <h1>Backups</h1>
+        <div class="bar-right"><button class="btn ghost" id="refresh-backups">Refresh</button></div>
+      </header>
+      <div class="panel form">
+        <h3>Back up a folder</h3>
+        <p class="muted small">Snapshot a save folder before you mod. The Games screen shows each game's save folders.</p>
+        <div class="row">
+          <input id="bk-folder" placeholder="Folder to back up, e.g. C:\Users\you\Documents\My Games\Terraria">
+          <button class="btn ghost" data-browse="bk-folder">Browse…</button>
+        </div>
+        <div class="row">
+          <input id="bk-name" placeholder="Name (optional), e.g. terraria-saves">
+          <input id="bk-note" placeholder="Note (optional)">
+          <button class="btn primary" id="bk-create">Create backup</button>
+        </div>
+      </div>
+      <div id="backups-list" class="stack"></div>
+    </section>
+
+    <!-- Publish -->
+    <section class="view" id="view-publish">
+      <header class="bar"><h1>Publish check</h1></header>
+      <div class="panel form">
+        <p class="muted small">Run this before sharing a mod. It fails on copied game files and leaked keys, and warns about
+          decompiled code, missing README or credits, and personal paths.</p>
+        <div class="row">
+          <input id="pub-folder" placeholder="Mod folder">
+          <button class="btn ghost" data-browse="pub-folder">Browse…</button>
+        </div>
+        <div class="row">
+          <input id="pub-game" placeholder="Game install folder (optional, catches copied game files)">
+          <button class="btn ghost" data-browse="pub-game">Browse…</button>
+          <button class="btn primary" id="pub-run">Check</button>
+        </div>
+      </div>
+      <div id="pub-result"></div>
+    </section>
+
+    <!-- Settings -->
+    <section class="view" id="view-settings">
+      <header class="bar"><h1>Settings</h1></header>
+      <div class="panel form">
+        <h3>AI model (Ollama)</h3>
+        <p class="muted small">Install Ollama from <b>ollama.com</b>, then pull a model that supports tools, for example
+          <code>ollama pull qwen3-coder</code> (needs a strong GPU) or <code>ollama pull qwen3:8b</code> (smaller).</p>
+        <label>Ollama address</label>
+        <div class="row"><input id="set-url" placeholder="http://localhost:11434"><button class="btn ghost" id="set-test">Test</button></div>
+        <label>Model</label>
+        <div class="row"><select id="set-model"></select></div>
+        <label>Context size</label>
+        <div class="row">
+          <select id="set-ctx">
+            <option value="8192">8k (low memory)</option>
+            <option value="16384">16k</option>
+            <option value="32768">32k (recommended)</option>
+            <option value="65536">64k</option>
+            <option value="131072">128k (lots of memory)</option>
+          </select>
+        </div>
+        <p class="muted small">Bigger context lets the AI keep more of the guides and files in mind, but uses more GPU memory.</p>
+        <h3>Workspace</h3>
+        <p class="muted small">Where the AI writes new mod files without asking. Writing anywhere else needs your OK.</p>
+        <div class="row">
+          <input id="set-ws">
+          <button class="btn ghost" data-browse="set-ws">Browse…</button>
+          <button class="btn ghost" id="set-open-ws">Open</button>
+        </div>
+        <div class="row end"><span class="muted small" id="set-msg"></span><button class="btn primary" id="set-save">Save</button></div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<dialog id="confirm">
+  <form method="dialog">
+    <h3 id="confirm-title"></h3>
+    <p id="confirm-body" class="muted"></p>
+    <div class="row end">
+      <button class="btn ghost" value="no">Cancel</button>
+      <button class="btn danger" value="yes" id="confirm-yes">Yes</button>
+    </div>
+  </form>
+</dialog>
+<div id="toasts"></div>
+<script src="app.js"></script>
+</body>
+</html>

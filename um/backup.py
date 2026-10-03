@@ -1,7 +1,7 @@
 """Snapshot folders before touching them (saves, profiles, config, the game's data folder).
 
     um backup create "C:\\Users\\me\\Documents\\My Games\\Terraria" --name terraria-saves
-    um backup list [name]
+    um backup list [name] [--json]
     um backup diff terraria-saves "C:\\Users\\me\\Documents\\My Games\\Terraria"     # what changed since the last snapshot
     um backup restore terraria-saves [--to DIR] [--snapshot FILE] [--yes]
 
@@ -113,10 +113,16 @@ def main(a):
     elif a.cmd == "list":
         root = data_dir() / "backups"
         names = [a.name] if a.name else sorted(p.name for p in root.glob("*") if p.is_dir()) if root.exists() else []
+        rows = []
         for n in names:
             for zp in snapshots(n):
                 m = _manifest(zp)
-                print(f"{n:28} {zp.name}  {len(m['files']):5} files  {m['source']}  {m.get('note', '')}")
+                rows.append(dict(name=n, snapshot=str(zp), file=zp.name, files=len(m["files"]), bytes=zp.stat().st_size,
+                                 source=m["source"], created=m.get("created"), note=m.get("note", "")))
+        if a.json:
+            print(json.dumps(rows, indent=1))
+        for r in [] if a.json else rows:
+            print(f"{r['name']:28} {r['file']}  {r['files']:5} files  {r['source']}  {r['note']}")
     elif a.cmd == "diff":
         print(json.dumps(diff(a.name, a.target, a.snapshot), indent=1))
     elif a.cmd == "restore":
@@ -135,6 +141,7 @@ def register(sub):
     q.set_defaults(func=main)
     q = cs.add_parser("list", help="list snapshots")
     q.add_argument("name", nargs="?")
+    q.add_argument("--json", action="store_true")
     q.set_defaults(func=main)
     q = cs.add_parser("diff", help="what changed since the latest snapshot")
     q.add_argument("name")

@@ -51,6 +51,25 @@ export FAL_KEY=...
 You also need Python 3.10+ and ffmpeg. `uv` is recommended. Blender is needed for 3D → sprite renders.
 Windows games are driven natively or from WSL.
 
+## The desktop app
+
+Prefer clicking to typing? **Universal Modder** is a desktop app on top of the same toolkit:
+- **Chat:** an AI on your own [Ollama](https://ollama.com) that mods games with the toolkit. It scans your
+  games, reads the knowledge base and the engine playbooks, backs up saves, writes mod files into a workspace
+  folder, and asks before it runs a command, restores a backup or writes anywhere else.
+- **Games:** your Steam/Epic/Xbox games, each with its engine, anti-cheat, mod loaders, save folders and the
+  best way to mod it.
+- **Backups:** snapshot save folders, see what changed, restore.
+- **Publish check:** the pre-release lint, with a clear verdict.
+
+**Windows:** download `UniversalModder-windows` from the latest
+[windows app](../../actions/workflows/windows-app.yml) run, unzip it and double-click `UniversalModder.exe`. From a clone,
+double-click `Universal Modder.cmd` (needs [uv](https://docs.astral.sh/uv/)), or run `um app` on any OS.
+
+For the chat, pull a model that supports tool calling (`ollama pull qwen3-coder` on a strong GPU, `qwen3:8b` on
+smaller ones) and pick it in Settings. Everything stays on your PC: the window talks to a server on 127.0.0.1
+with a per-launch token.
+
 ## Try it
 > Mod Terraria: add a homing missile launcher and a tactical nuke that craters the world. Make the sprites with fal.
 
@@ -124,6 +143,7 @@ and an honest status and verification.
 | `um backup` | Snapshot, diff and restore save folders |
 | `um publish check` | Blocks shipping game files, decompiled code and leaked keys |
 | `um kb` | The knowledge base: `search`, `show`, `new`, `check`, `index`, `sync`, `pr` |
+| `um app` | The desktop app: AI chat on your own Ollama plus screens for games, backups and the publish check |
 
 Two no-build Windows tools ship inside the package (`um/ps1/`): WinDrive input and ProcLoopback game-only
 audio, both PowerShell with embedded C#.

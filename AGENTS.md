@@ -25,6 +25,8 @@ repo, they almost always want to **mod a game**, or to learn how a game was modd
     - `backup`: snapshot and restore saves
     - `publish`: pre-release lint
     - `kb`: the knowledge base
+    - `app`: the desktop app for humans (AI chat on Ollama + buttons for the tools); `packaging/` builds
+      the Windows `.exe`
 - **fal MCP server:** `https://mcp.fal.ai/mcp` with header `Authorization: Bearer $FAL_KEY`.
   - It's pre-configured per agent: `.mcp.json` (Claude Code), `.codex/config.toml` (Codex),
     `.cursor/mcp.json` (Cursor), `.vscode/mcp.json` (VS Code / Copilot), `gemini-extension.json`
