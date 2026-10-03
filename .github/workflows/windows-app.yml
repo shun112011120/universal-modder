@@ -1,9 +1,9 @@
 name: windows app
 on:
   push:
-    paths: ["um/**", "packaging/**", "skills/**", "knowledge/**", "tests/test_app.py", "pyproject.toml", "Universal Modder.cmd", ".github/workflows/windows-app.yml"]
+    paths: ["um/**", "packaging/**", "skills/**", "knowledge/**", "tests/test_app.py", "pyproject.toml", "Universal Modder.cmd", "Start Claude Code.cmd", "setup/**", ".github/workflows/windows-app.yml"]
   pull_request:
-    paths: ["um/**", "packaging/**", "skills/**", "knowledge/**", "tests/test_app.py", "pyproject.toml", "Universal Modder.cmd", ".github/workflows/windows-app.yml"]
+    paths: ["um/**", "packaging/**", "skills/**", "knowledge/**", "tests/test_app.py", "pyproject.toml", "Universal Modder.cmd", "Start Claude Code.cmd", "setup/**", ".github/workflows/windows-app.yml"]
   workflow_dispatch:
 jobs:
   build:
@@ -16,6 +16,13 @@ jobs:
       - uses: astral-sh/setup-uv@v6
       - name: app tests on Windows
         run: uv run --python 3.12 --with pytest pytest -q tests/test_app.py
+      - name: setup scripts parse in Windows PowerShell
+        shell: powershell
+        run: |
+          $errs = $null
+          [void][System.Management.Automation.Language.Parser]::ParseFile("$PWD\setup\start-claude.ps1", [ref]$null, [ref]$errs)
+          if ($errs) { $errs | ForEach-Object { Write-Error $_.ToString() }; exit 1 }
+          Write-Host "start-claude.ps1 parses"
       - name: double-click launcher, portable
         shell: pwsh
         run: |

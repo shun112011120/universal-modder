@@ -73,6 +73,10 @@ Prefer clicking to typing? **Universal Modder** is a desktop app on top of the s
 into the folder. Both are portable: settings, backups, the app window's browser data and your mods (`My Mods`)
 stay inside the folder, so moving or deleting the folder moves or removes everything. `um app` runs it on any OS.
 
+**Claude Code on Windows:** double-click `Start Claude Code.cmd` in a clone. It updates the folder, installs
+Claude Code on first run (it asks first) and starts a session that reads `START_HERE.md` to pick up where the
+last one left off.
+
 For the chat, pick any Ollama model in Settings; ones with tool calling (`qwen3-coder` on a strong GPU, `qwen3:8b`
 on smaller ones) are the most reliable. Everything stays on your PC: the window talks to a server on 127.0.0.1
 with a per-launch token.

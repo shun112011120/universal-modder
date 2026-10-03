@@ -18,3 +18,5 @@ dist/
 /data/
 /My Mods/
 /.uv/
+# the owner's personal setup notes, read by agents (START_HERE.md)
+SETUP_SUMMARY.md
