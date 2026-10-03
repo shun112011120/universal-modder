@@ -16,6 +16,8 @@ if exist "%UV%" goto :run
 echo First run: downloading uv (the Python manager) into this folder...
 rem an "unmanaged" install: no PATH changes, no install receipt, nothing outside this folder
 set "UV_UNMANAGED_INSTALL=%ROOT%\.uv\bin"
+rem started from PowerShell 7, Windows PowerShell would inherit 7's module path and fail to load its own modules
+set "PSModulePath="
 powershell -NoProfile -ExecutionPolicy Bypass -Command "irm https://astral.sh/uv/install.ps1 | iex"
 if not exist "%UV%" (
   echo Could not download uv. Check your internet connection and try again.
