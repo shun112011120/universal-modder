@@ -1,6 +1,7 @@
 # PyInstaller spec for the Windows app: one folder with UniversalModder.exe (the app, no console window) and
-# um.exe (the CLI the app calls for its tools), sharing one Python runtime.
-#   uv run --with pyinstaller pyinstaller --noconfirm packaging/universal-modder.spec   ->  dist/UniversalModder/
+# um.exe (the CLI the app calls for its tools), sharing one Python runtime. Portable: everything the app
+# makes goes into data/ and My Mods/ next to the exes (packaging/app_entry.py).
+#   uv run --with pyinstaller pyinstaller --noconfirm packaging/universal-modder.spec   ->  dist/Universal Modder/
 # .github/workflows/windows-app.yml builds it on every change and uploads it as an artifact.
 from pathlib import Path
 
@@ -15,4 +16,4 @@ pyz = PYZ(a.pure)
 icon = str(ROOT / "packaging" / "icon.ico")
 app = EXE(pyz, a.scripts, [], exclude_binaries=True, name="UniversalModder", console=False, icon=icon)
 cli = EXE(pyz, a.scripts, [], exclude_binaries=True, name="um", console=True, icon=icon)
-COLLECT(app, cli, a.binaries, a.datas, name="UniversalModder")
+COLLECT(app, cli, a.binaries, a.datas, name="Universal Modder")

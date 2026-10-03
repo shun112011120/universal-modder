@@ -11,7 +11,9 @@ plus reading files, writing mod files into your workspace folder and running bui
 backup, writing outside the workspace and running a command always wait for you to click Allow.
 
 The window is the app's own server on 127.0.0.1 (random port, a fresh token per launch) shown in an Edge or
-Chrome app window, or pywebview when it is installed. Settings live in ~/.universal-modder/app.json.
+Chrome app window, or pywebview when it is installed. Settings live in ~/.universal-modder/app.json; when
+portable (UM_PORTABLE, set by the Windows app and `Universal Modder.cmd`) settings, backups, the window's
+browser profile and the workspace ("My Mods") all stay inside the app folder.
 """
 from __future__ import annotations
 
@@ -32,7 +34,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
 from um import __version__
-from um.common import data_dir, is_mac, is_windows, is_wsl
+from um.common import data_dir, is_mac, is_windows, is_wsl, portable_root
 
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parent                       # the repo (or the PyInstaller bundle): skills/ and knowledge/ live here
@@ -51,6 +53,8 @@ def config_path() -> Path:
 
 
 def default_workspace() -> str:
+    if portable_root():
+        return str(portable_root() / "My Mods")
     docs = Path.home() / "Documents"
     return str((docs if docs.is_dir() else Path.home()) / "Universal Modder")
 

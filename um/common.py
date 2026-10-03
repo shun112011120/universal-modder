@@ -46,9 +46,17 @@ def to_posix(path: str | Path) -> str:
     return p
 
 
+def portable_root() -> Path | None:
+    """The app folder when running portable (the Windows app and its launcher set UM_PORTABLE): then every file
+    the toolkit makes stays inside that folder."""
+    p = os.environ.get("UM_PORTABLE", "").strip()
+    return Path(p) if p else None
+
+
 def data_dir() -> Path:
-    """Per-user state: backups, downloaded tools. Override with UM_HOME."""
-    d = Path(os.environ.get("UM_HOME", Path.home() / ".universal-modder"))
+    """Per-user state: backups, downloaded tools. UM_HOME overrides; portable: <app folder>/data."""
+    root = portable_root()
+    d = Path(os.environ.get("UM_HOME") or (root / "data" if root else Path.home() / ".universal-modder"))
     d.mkdir(parents=True, exist_ok=True)
     return d
 

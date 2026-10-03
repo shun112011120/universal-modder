@@ -13,3 +13,8 @@ dist/
 .pytest_cache/
 # the parent repo ignores bin/ (build output); the CLI launcher lives here
 !bin/
+
+# portable app data (Universal Modder.cmd / the Windows app)
+/data/
+/My Mods/
+/.uv/

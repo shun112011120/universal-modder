@@ -62,9 +62,11 @@ Prefer clicking to typing? **Universal Modder** is a desktop app on top of the s
 - **Backups:** snapshot save folders, see what changed, restore.
 - **Publish check:** the pre-release lint, with a clear verdict.
 
-**Windows:** download `UniversalModder-windows` from the latest
-[windows app](../../actions/workflows/windows-app.yml) run, unzip it and double-click `UniversalModder.exe`. From a clone,
-double-click `Universal Modder.cmd` (needs [uv](https://docs.astral.sh/uv/)), or run `um app` on any OS.
+**Windows:** download **Universal Modder (Windows)** from the latest
+[windows app](../../actions/workflows/windows-app.yml) run, unzip it (to your Desktop, say) and double-click
+`UniversalModder.exe`. Or double-click `Universal Modder.cmd` in a clone; on first run it downloads uv and Python
+into the folder. Both are portable: settings, backups, the app window's browser data and your mods (`My Mods`)
+stay inside the folder, so moving or deleting the folder moves or removes everything. `um app` runs it on any OS.
 
 For the chat, pull a model that supports tool calling (`ollama pull qwen3-coder` on a strong GPU, `qwen3:8b` on
 smaller ones) and pick it in Settings. Everything stays on your PC: the window talks to a server on 127.0.0.1

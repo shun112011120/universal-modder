@@ -179,3 +179,12 @@ def test_backup_roundtrip_through_tools(home):
     assert rows[0]["name"] == "test-saves" and rows[0]["files"] == 1
     app.call_tool("backup_restore", {"name": "test-saves"})
     assert (saves / "world.wld").read_text() == "v1"
+
+
+def test_portable_keeps_everything_in_the_app_folder(tmp_path, monkeypatch):
+    monkeypatch.delenv("UM_HOME", raising=False)
+    monkeypatch.setenv("UM_PORTABLE", str(tmp_path / "Universal Modder"))
+    from um import common
+    assert common.data_dir() == tmp_path / "Universal Modder" / "data"
+    assert app.config_path().parent == tmp_path / "Universal Modder" / "data"
+    assert app.load_config()["workspace"] == str(tmp_path / "Universal Modder" / "My Mods")

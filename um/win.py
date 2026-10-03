@@ -31,7 +31,7 @@ import urllib.request
 import zipfile
 from pathlib import Path
 
-from um.common import die, is_windows, is_wsl, to_posix, to_win
+from um.common import data_dir, die, is_windows, is_wsl, portable_root, to_posix, to_win
 
 HERE = Path(__file__).resolve().parent
 TOOLS = HERE / "ps1"          # shipped inside the package so `uv tool install` gets them too
@@ -58,7 +58,11 @@ def powershell(script: str, timeout: float = 60) -> str:
 
 
 def local_appdata() -> Path:
-    """%LOCALAPPDATA%\\universal-modder (posix path under WSL)."""
+    """%LOCALAPPDATA%\\universal-modder (posix path under WSL); <app folder>/data/win when portable on Windows."""
+    if is_windows() and portable_root():
+        d = data_dir() / "win"
+        d.mkdir(parents=True, exist_ok=True)
+        return d
     if is_windows():
         base = Path(os.environ["LOCALAPPDATA"])
     else:
