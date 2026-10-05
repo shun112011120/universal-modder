@@ -25,6 +25,12 @@ owner has copied it in. It's git-ignored: read it, never commit it.
     "Universal Modder (Windows)").
 - Heavy work (writing whole mods) is done by Claude Code on this PC, started with `Start Claude Code.cmd`.
   The app's local model is for scanning, backups, art and small edits.
+- **One folder** (owner's choice, 2026-10-05): this clone is the whole workflow. The owner runs the app with
+  `Universal Modder.cmd` from here (uv, Python and libraries in `.uv/` and `.venv/`, settings in `data/`, app
+  workspace in `My Mods/`, all git-ignored); the separate `.exe` folder was retired. Mods Claude builds live in
+  `mods/` and are committed. Local checks: `.uv\bin\uv.exe run --with pytest pytest -q tests` (with the
+  launcher's `UV_*` variables); on Windows `tests/test_um.py` fails at collection (it calls `which`) and
+  `um kb check` reports `INDEX.md` stale because of CRLF checkouts. Both pass in CI.
 
 **Current project: State of Decay 2 inside Minecraft** (v0.1.0 written, not tested in game yet).
 - Route: a Minecraft **Java** mod (Fabric), pattern 1 of `skills/mashup-mods` ("port the content"): State of
