@@ -6,4 +6,4 @@
 - `Start Claude Code.cmd` (Windows) installs Claude Code if needed and starts a session that does this.
 - Installed as a plugin, the skills are namespaced (`/universal-modder:mod-any-game`), the fal MCP server comes
   from `.mcp.json` (needs `FAL_KEY` in the environment), and a SessionStart hook puts `um` on PATH.
-- In a clone, `.claude/settings.json` adds the same PATH hook and `.claude/skills` links to `skills/`.
+- In a clone, `.claude/settings.json` adds the same PATH hook, and `.claude/skills` is a copy of `skills/`.
