@@ -2,7 +2,7 @@ package com.sodcraft.entity;
 
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.sounds.SoundEvents;
+import com.sodcraft.SodSounds;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -38,7 +38,7 @@ public class Juggernaut extends SodZombie {
 			away = away.normalize();
 			target.setDeltaMovement(away.x * 1.8, 0.85, away.z * 1.8);
 			target.needsSync = true;
-			level.playSound(null, getX(), getY(), getZ(), SoundEvents.RAVAGER_ATTACK, SoundSource.HOSTILE, 2.0F, 0.6F);
+			level.playSound(null, getX(), getY(), getZ(), SodSounds.JUGGERNAUT_ATTACK, SoundSource.HOSTILE, 2.0F, 1.0F);
 			if (target instanceof Player player) {
 				player.sendOverlayMessage(Component.translatable("message.sodcraft.thrown"));
 			}

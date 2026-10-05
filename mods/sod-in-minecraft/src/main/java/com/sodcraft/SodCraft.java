@@ -24,6 +24,7 @@ public class SodCraft implements ModInitializer {
 
 	@Override
 	public void onInitialize() {
+		SodSounds.init();
 		ModContent.init();
 		FabricDefaultAttributeRegistry.register(ModContent.SCREAMER, Screamer.createAttributes());
 		FabricDefaultAttributeRegistry.register(ModContent.PLAGUE_ZOMBIE, SodZombie.plagueAttributes());

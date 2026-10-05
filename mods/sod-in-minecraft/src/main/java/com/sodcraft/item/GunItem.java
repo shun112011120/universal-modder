@@ -1,12 +1,13 @@
 package com.sodcraft.item;
 
 import com.sodcraft.SodCraft;
+import com.sodcraft.SodSounds;
 import com.sodcraft.entity.ArmoredZombie;
 import java.util.function.Supplier;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
@@ -46,11 +47,15 @@ public class GunItem extends Item {
 
 	private final Stats stats;
 	private final Supplier<Item> ammo;
+	private final SoundEvent fireSound;
+	private final SoundEvent reloadSound;
 
-	public GunItem(final Stats stats, final Supplier<Item> ammo, final Properties properties) {
+	public GunItem(final Stats stats, final Supplier<Item> ammo, final SoundEvent fireSound, final SoundEvent reloadSound, final Properties properties) {
 		super(properties.durability(stats.magazine()));
 		this.stats = stats;
 		this.ammo = ammo;
+		this.fireSound = fireSound;
+		this.reloadSound = reloadSound;
 	}
 
 	public static int loaded(final ItemStack gun) {
@@ -130,7 +135,7 @@ public class GunItem extends Item {
 		}
 
 		level.sendParticles(ParticleTypes.SMOKE, eye.x + look.x * 0.9, eye.y + look.y * 0.9 - 0.15, eye.z + look.z * 0.9, 3, 0.03, 0.03, 0.03, 0.01);
-		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.FIREWORK_ROCKET_BLAST, SoundSource.PLAYERS, 3.0F, stats.pitch());
+		level.playSound(null, player.getX(), player.getY(), player.getZ(), fireSound, SoundSource.PLAYERS, 3.0F, 1.0F);
 		if (headshotSeen) {
 			player.sendOverlayMessage(Component.translatable("message.sodcraft.headshot"));
 		} else if (armoredSeen) {
@@ -206,14 +211,14 @@ public class GunItem extends Item {
 
 		int taken = player.getAbilities().instabuild ? need : takeAmmo(player, need);
 		if (taken <= 0) {
-			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.DISPENSER_FAIL, SoundSource.PLAYERS, 1.0F, 1.6F);
+			level.playSound(null, player.getX(), player.getY(), player.getZ(), SodSounds.DRY_FIRE, SoundSource.PLAYERS, 1.0F, 1.0F);
 			player.sendOverlayMessage(Component.translatable("message.sodcraft.no_ammo", Component.translatable(ammo.get().getDescriptionId())));
 			player.getCooldowns().addCooldown(gun, 10);
 			return;
 		}
 
 		gun.setDamageValue(need - taken);
-		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.CROSSBOW_LOADING_END, SoundSource.PLAYERS, 1.0F, 1.2F);
+		level.playSound(null, player.getX(), player.getY(), player.getZ(), reloadSound, SoundSource.PLAYERS, 1.0F, 1.0F);
 		player.sendOverlayMessage(Component.translatable("message.sodcraft.reloaded", loaded(gun), gun.getMaxDamage()));
 		player.getCooldowns().addCooldown(gun, stats.reloadTicks());
 		SodCraft.LOG.debug("reloaded {} rounds", taken);

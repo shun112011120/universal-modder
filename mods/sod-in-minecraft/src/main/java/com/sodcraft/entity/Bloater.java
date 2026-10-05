@@ -1,8 +1,9 @@
 package com.sodcraft.entity;
 
+import com.sodcraft.SodSounds;
+import net.minecraft.sounds.SoundEvent;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -63,7 +64,21 @@ public class Bloater extends SodZombie {
 		cloud.addEffect(new MobEffectInstance(MobEffects.NAUSEA, 160, 0));
 		level.addFreshEntity(cloud);
 		level.sendParticles(ParticleTypes.SNEEZE, getX(), getY() + 1.0, getZ(), 40, 1.2, 0.8, 1.2, 0.02);
-		level.playSound(null, getX(), getY(), getZ(), SoundEvents.PUFFER_FISH_BLOW_UP, SoundSource.HOSTILE, 2.0F, 0.5F);
-		level.playSound(null, getX(), getY(), getZ(), SoundEvents.SLIME_DEATH, SoundSource.HOSTILE, 2.0F, 0.6F);
+		level.playSound(null, getX(), getY(), getZ(), SodSounds.BLOATER_BURST, SoundSource.HOSTILE, 2.5F, 1.0F);
+	}
+
+	@Override
+	protected SoundEvent getAmbientSound() {
+		return SodSounds.BLOATER_AMBIENT;
+	}
+
+	@Override
+	protected SoundEvent getHurtSound(final DamageSource source) {
+		return SodSounds.BLOATER_HURT;
+	}
+
+	@Override
+	protected SoundEvent getDeathSound() {
+		return SodSounds.BLOATER_BURST;
 	}
 }

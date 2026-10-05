@@ -2,10 +2,12 @@ package com.sodcraft.entity;
 
 import com.sodcraft.SodCraft;
 import java.util.List;
+import com.sodcraft.SodSounds;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.sounds.SoundEvent;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
@@ -57,7 +59,7 @@ public class Screamer extends SodZombie {
 	}
 
 	private void scream(final ServerLevel level, final Player player) {
-		level.playSound(null, getX(), getY(), getZ(), SoundEvents.GHAST_SCREAM, SoundSource.HOSTILE, 4.0F, 0.6F);
+		level.playSound(null, getX(), getY(), getZ(), SodSounds.SCREAMER_SCREAM, SoundSource.HOSTILE, 4.0F, 1.0F);
 		level.sendParticles(ParticleTypes.SONIC_BOOM, getX(), getEyeY(), getZ(), 1, 0.0, 0.0, 0.0, 0.0);
 
 		List<Zombie> horde = level.getEntitiesOfClass(Zombie.class, getBoundingBox().inflate(CALL_RANGE),
@@ -81,4 +83,18 @@ public class Screamer extends SodZombie {
 		SodCraft.LOG.info("screamer at {} called {} zombies", blockPosition().toShortString(), horde.size());
 	}
 
+	@Override
+	protected SoundEvent getAmbientSound() {
+		return SodSounds.SCREAMER_AMBIENT;
+	}
+
+	@Override
+	protected SoundEvent getHurtSound(final DamageSource source) {
+		return SodSounds.SCREAMER_HURT;
+	}
+
+	@Override
+	protected SoundEvent getDeathSound() {
+		return SodSounds.SCREAMER_DEATH;
+	}
 }

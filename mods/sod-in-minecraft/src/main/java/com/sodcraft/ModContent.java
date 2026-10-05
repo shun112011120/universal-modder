@@ -106,7 +106,8 @@ public final class ModContent {
 	}
 
 	private static Item gun(final String name, final GunItem.Stats stats, final java.util.function.Supplier<Item> ammo) {
-		return item(name, p -> new GunItem(stats, ammo, p), new Item.Properties());
+		return item(name, p -> new GunItem(stats, ammo, SodSounds.register("gun." + name + ".fire"), SodSounds.register("gun." + name + ".reload"), p),
+			new Item.Properties());
 	}
 
 	private static Item item(final String name, final java.util.function.Function<Item.Properties, Item> factory, final Item.Properties properties) {

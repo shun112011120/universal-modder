@@ -1,0 +1,412 @@
+{
+	"gun.pistol.fire": {
+		"sounds": [
+			{
+				"name": "minecraft:entity.firework_rocket.blast",
+				"type": "event",
+				"pitch": 1.5,
+				"volume": 1.0
+			}
+		]
+	},
+	"gun.pistol.reload": {
+		"sounds": [
+			{
+				"name": "minecraft:item.crossbow.loading_end",
+				"type": "event",
+				"pitch": 1.2,
+				"volume": 1.0
+			}
+		]
+	},
+	"gun.glock17.fire": {
+		"sounds": [
+			{
+				"name": "minecraft:entity.firework_rocket.blast",
+				"type": "event",
+				"pitch": 1.7,
+				"volume": 1.0
+			}
+		]
+	},
+	"gun.glock17.reload": {
+		"sounds": [
+			{
+				"name": "minecraft:item.crossbow.loading_end",
+				"type": "event",
+				"pitch": 1.2,
+				"volume": 1.0
+			}
+		]
+	},
+	"gun.m9.fire": {
+		"sounds": [
+			{
+				"name": "minecraft:entity.firework_rocket.blast",
+				"type": "event",
+				"pitch": 1.65,
+				"volume": 1.0
+			}
+		]
+	},
+	"gun.m9.reload": {
+		"sounds": [
+			{
+				"name": "minecraft:item.crossbow.loading_end",
+				"type": "event",
+				"pitch": 1.2,
+				"volume": 1.0
+			}
+		]
+	},
+	"gun.revolver44.fire": {
+		"sounds": [
+			{
+				"name": "minecraft:entity.firework_rocket.blast",
+				"type": "event",
+				"pitch": 1.0,
+				"volume": 1.0
+			}
+		]
+	},
+	"gun.revolver44.reload": {
+		"sounds": [
+			{
+				"name": "minecraft:item.crossbow.loading_end",
+				"type": "event",
+				"pitch": 1.2,
+				"volume": 1.0
+			}
+		]
+	},
+	"gun.shotgun870.fire": {
+		"sounds": [
+			{
+				"name": "minecraft:entity.firework_rocket.blast",
+				"type": "event",
+				"pitch": 0.7,
+				"volume": 1.0
+			}
+		]
+	},
+	"gun.shotgun870.reload": {
+		"sounds": [
+			{
+				"name": "minecraft:item.crossbow.loading_end",
+				"type": "event",
+				"pitch": 1.2,
+				"volume": 1.0
+			}
+		]
+	},
+	"gun.aa12.fire": {
+		"sounds": [
+			{
+				"name": "minecraft:entity.firework_rocket.blast",
+				"type": "event",
+				"pitch": 0.75,
+				"volume": 1.0
+			}
+		]
+	},
+	"gun.aa12.reload": {
+		"sounds": [
+			{
+				"name": "minecraft:item.crossbow.loading_end",
+				"type": "event",
+				"pitch": 1.2,
+				"volume": 1.0
+			}
+		]
+	},
+	"gun.ar15.fire": {
+		"sounds": [
+			{
+				"name": "minecraft:entity.firework_rocket.blast",
+				"type": "event",
+				"pitch": 1.25,
+				"volume": 1.0
+			}
+		]
+	},
+	"gun.ar15.reload": {
+		"sounds": [
+			{
+				"name": "minecraft:item.crossbow.loading_end",
+				"type": "event",
+				"pitch": 1.2,
+				"volume": 1.0
+			}
+		]
+	},
+	"gun.ak47.fire": {
+		"sounds": [
+			{
+				"name": "minecraft:entity.firework_rocket.blast",
+				"type": "event",
+				"pitch": 1.05,
+				"volume": 1.0
+			}
+		]
+	},
+	"gun.ak47.reload": {
+		"sounds": [
+			{
+				"name": "minecraft:item.crossbow.loading_end",
+				"type": "event",
+				"pitch": 1.2,
+				"volume": 1.0
+			}
+		]
+	},
+	"gun.scarh.fire": {
+		"sounds": [
+			{
+				"name": "minecraft:entity.firework_rocket.blast",
+				"type": "event",
+				"pitch": 0.95,
+				"volume": 1.0
+			}
+		]
+	},
+	"gun.scarh.reload": {
+		"sounds": [
+			{
+				"name": "minecraft:item.crossbow.loading_end",
+				"type": "event",
+				"pitch": 1.2,
+				"volume": 1.0
+			}
+		]
+	},
+	"gun.m14.fire": {
+		"sounds": [
+			{
+				"name": "minecraft:entity.firework_rocket.blast",
+				"type": "event",
+				"pitch": 0.95,
+				"volume": 1.0
+			}
+		]
+	},
+	"gun.m14.reload": {
+		"sounds": [
+			{
+				"name": "minecraft:item.crossbow.loading_end",
+				"type": "event",
+				"pitch": 1.2,
+				"volume": 1.0
+			}
+		]
+	},
+	"gun.rifle.fire": {
+		"sounds": [
+			{
+				"name": "minecraft:entity.firework_rocket.blast",
+				"type": "event",
+				"pitch": 0.8,
+				"volume": 1.0
+			}
+		]
+	},
+	"gun.rifle.reload": {
+		"sounds": [
+			{
+				"name": "minecraft:item.crossbow.loading_end",
+				"type": "event",
+				"pitch": 1.2,
+				"volume": 1.0
+			}
+		]
+	},
+	"gun.bolt50.fire": {
+		"sounds": [
+			{
+				"name": "minecraft:entity.firework_rocket.blast",
+				"type": "event",
+				"pitch": 0.55,
+				"volume": 1.0
+			}
+		]
+	},
+	"gun.bolt50.reload": {
+		"sounds": [
+			{
+				"name": "minecraft:item.crossbow.loading_end",
+				"type": "event",
+				"pitch": 1.2,
+				"volume": 1.0
+			}
+		]
+	},
+	"gun.mp5.fire": {
+		"sounds": [
+			{
+				"name": "minecraft:entity.firework_rocket.blast",
+				"type": "event",
+				"pitch": 1.6,
+				"volume": 1.0
+			}
+		]
+	},
+	"gun.mp5.reload": {
+		"sounds": [
+			{
+				"name": "minecraft:item.crossbow.loading_end",
+				"type": "event",
+				"pitch": 1.2,
+				"volume": 1.0
+			}
+		]
+	},
+	"gun.thompson.fire": {
+		"sounds": [
+			{
+				"name": "minecraft:entity.firework_rocket.blast",
+				"type": "event",
+				"pitch": 1.3,
+				"volume": 1.0
+			}
+		]
+	},
+	"gun.thompson.reload": {
+		"sounds": [
+			{
+				"name": "minecraft:item.crossbow.loading_end",
+				"type": "event",
+				"pitch": 1.2,
+				"volume": 1.0
+			}
+		]
+	},
+	"gun.dryfire": {
+		"sounds": [
+			{
+				"name": "minecraft:block.dispenser.fail",
+				"type": "event",
+				"pitch": 1.6,
+				"volume": 1.0
+			}
+		]
+	},
+	"screamer.scream": {
+		"sounds": [
+			{
+				"name": "minecraft:entity.ghast.scream",
+				"type": "event",
+				"pitch": 0.6,
+				"volume": 1.0
+			}
+		]
+	},
+	"screamer.ambient": {
+		"sounds": [
+			{
+				"name": "minecraft:entity.zombie.ambient",
+				"type": "event",
+				"pitch": 1.2,
+				"volume": 1.0
+			}
+		]
+	},
+	"screamer.hurt": {
+		"sounds": [
+			{
+				"name": "minecraft:entity.zombie.hurt",
+				"type": "event",
+				"pitch": 1.2,
+				"volume": 1.0
+			}
+		]
+	},
+	"screamer.death": {
+		"sounds": [
+			{
+				"name": "minecraft:entity.zombie.death",
+				"type": "event",
+				"pitch": 1.2,
+				"volume": 1.0
+			}
+		]
+	},
+	"bloater.ambient": {
+		"sounds": [
+			{
+				"name": "minecraft:entity.zombie.ambient",
+				"type": "event",
+				"pitch": 0.7,
+				"volume": 1.0
+			}
+		]
+	},
+	"bloater.burst": {
+		"sounds": [
+			{
+				"name": "minecraft:entity.slime.death",
+				"type": "event",
+				"pitch": 0.6,
+				"volume": 1.0
+			}
+		]
+	},
+	"bloater.hurt": {
+		"sounds": [
+			{
+				"name": "minecraft:entity.slime.squish",
+				"type": "event",
+				"pitch": 0.7,
+				"volume": 1.0
+			}
+		]
+	},
+	"feral.ambient": {
+		"sounds": [
+			{
+				"name": "minecraft:entity.zombie.ambient",
+				"type": "event",
+				"pitch": 1.4,
+				"volume": 1.0
+			}
+		]
+	},
+	"feral.attack": {
+		"sounds": [
+			{
+				"name": "minecraft:entity.hoglin.attack",
+				"type": "event",
+				"pitch": 1.3,
+				"volume": 1.0
+			}
+		]
+	},
+	"feral.hurt": {
+		"sounds": [
+			{
+				"name": "minecraft:entity.zombie.hurt",
+				"type": "event",
+				"pitch": 1.4,
+				"volume": 1.0
+			}
+		]
+	},
+	"feral.death": {
+		"sounds": [
+			{
+				"name": "minecraft:entity.zombie.death",
+				"type": "event",
+				"pitch": 1.4,
+				"volume": 1.0
+			}
+		]
+	},
+	"juggernaut.attack": {
+		"sounds": [
+			{
+				"name": "minecraft:entity.ravager.attack",
+				"type": "event",
+				"pitch": 0.6,
+				"volume": 1.0
+			}
+		]
+	}
+}

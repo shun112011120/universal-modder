@@ -72,6 +72,18 @@ Journal for the mod. It becomes the field note at the end (`um kb new`).
 `/gamemode survival @s`. Right-click shoots, crouch + right-click reloads. Shoot near zombies: they all turn on you.
 Then the Plague Heart test again (place it, `/time set night`).
 
+## v0.5.0: State of Decay 2's own sounds
+- `tools/sod2_sounds.py`: SoD2 audio is Wwise, loose in `Content/WwiseAudio/Windows` (707 .bnk with embedded media
+  in DIDX/DATA, 1,499 .wem). `SoundbanksInfo.xml` names every file id (e.g. `wpn_pstl_45_colt1911_fire_impulse_02`).
+  vgmstream decodes (Wwise Vorbis), ffmpeg (`um win setup`) mixes and encodes mono Vorbis .ogg into the local pack
+  with a sounds.json that replaces the jar's fallbacks.
+- Gunshots: SoD2 layers each shot (impulse + body + mech + tail_ext_short): mixed back, 3 variants per gun. Reloads:
+  one take of each step in order (mag out, mag in, slide...). Voices: screamer yell/idle/pain/death, bloater
+  idle/pain/death(burst), feral idle/claw+lunge/pain/death, juggernaut punch, 1911 dry fire. 41 events, 108 files.
+- Gaps: SoD2's generic zombie voices (zdx_generic) aren't in these banks (streamed from elsewhere): plain/plague/
+  armored zombies keep vanilla voices. The Model 70 uses the bolt-action (.50) reload.
+- Jar: `SodSounds` registers the events; `assets/sodcraft/sounds.json` maps them to vanilla sounds as a fallback.
+
 ## v0.4.0: SoD2's own guns, rendered from the owner's install
 - Converter: `tools/sod2pak.py` (SoD2 paks: custom v3 0x10003, plain index, raw LZ4 = method 0x103),
   `tools/sod2tex.py` (headerless BC1/BC3 `.hirez.ubulk` top mips), UE Viewer `-game=sod2` for skeletal meshes

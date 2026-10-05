@@ -1,7 +1,11 @@
 package com.sodcraft.entity;
 
+import com.sodcraft.SodSounds;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.sounds.SoundEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
@@ -37,11 +41,30 @@ public class Feral extends SodZombie {
 	@Override
 	public boolean doHurtTarget(final ServerLevel level, final Entity target) {
 		boolean hit = super.doHurtTarget(level, target);
+		if (hit) {
+			level.playSound(null, getX(), getY(), getZ(), SodSounds.FERAL_ATTACK, SoundSource.HOSTILE, 1.5F, 1.0F);
+		}
+
 		if (hit && target instanceof Player player) {
 			player.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, 30, 4), this);
 			player.sendOverlayMessage(Component.translatable("message.sodcraft.pinned"));
 		}
 
 		return hit;
+	}
+
+	@Override
+	protected SoundEvent getAmbientSound() {
+		return SodSounds.FERAL_AMBIENT;
+	}
+
+	@Override
+	protected SoundEvent getHurtSound(final DamageSource source) {
+		return SodSounds.FERAL_HURT;
+	}
+
+	@Override
+	protected SoundEvent getDeathSound() {
+		return SodSounds.FERAL_DEATH;
 	}
 }
