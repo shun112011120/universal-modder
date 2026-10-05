@@ -72,6 +72,22 @@ Journal for the mod. It becomes the field note at the end (`um kb new`).
 `/gamemode survival @s`. Right-click shoots, crouch + right-click reloads. Shoot near zombies: they all turn on you.
 Then the Plague Heart test again (place it, `/time set night`).
 
+## v0.3.0: SoD2's zombie types and blood plague
+- `SodZombie` base: no daylight burning, no drowned conversion, never babies, no vanilla reinforcements; plague
+  variants give blood plague on hit.
+- Types: plague zombie (26 HP), feral + plague feral (fast 0.38, lunge via LeapAtTargetGoal, pins: slowness V 1.5 s),
+  bloater (scale 1.25, bursts within 2.2 blocks or on death: poison II + nausea cloud r=4 for 10 s), juggernaut +
+  plague juggernaut (scale 1.7, 150 HP, armor 10, no knockback, throws the player), armored zombie (iron helmet and
+  chestplate, no drop; headshots get no bonus). Screamer now extends SodZombie.
+- Blood plague (mob effect): +20% per plague hit, 60% hunger, 80% slowness + weakness, 100% 1.5 damage every 2 s.
+  Plague samples drop from plague types; plague cure = 3 samples + glass bottle + sugar.
+- Natural spawns: the first time a vanilla zombie loads it may become a freak (per 1000: plague 90, screamer 30,
+  bloater 30, feral 25, armored 25, juggernaut 8, plague feral 6, plague juggernaut 3).
+- Plague Heart waves: plague zombies + plain ones; ferals and bloaters from wave 2, plague ferals from wave 3, a
+  screamer every other wave, a plague juggernaut every third wave; defenders are plague zombies / plague ferals.
+- Look: placeholder skins on the zombie model for now. Next: SoD2's real meshes and textures through a custom
+  renderer (the 1911 is extracted and previewed; see tools/sod2pak.py, sod2tex.py).
+
 ## How to test (v0.1 features) (survival test world, difficulty Normal, cheats on)
 1. `/give @s sodcraft:plague_heart`, place it on open flat ground, step ~10 blocks back.
 2. `/time set night`. Within 1-2 s: "The Plague Heart calls the horde (wave 1)" and 3 zombies rise in smoke

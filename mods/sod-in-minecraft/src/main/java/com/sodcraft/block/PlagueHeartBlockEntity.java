@@ -72,9 +72,14 @@ public class PlagueHeartBlockEntity extends BlockEntity {
 			return; // its horde is still out there
 		}
 
-		int spawned = heart.spawnAround(serverLevel, EntityTypes.ZOMBIE, size, 6, 14, player);
-		if (heart.waves % 2 == 1) {
-			spawned += heart.spawnAround(serverLevel, ModContent.SCREAMER, 1, 8, 14, player);
+		final int wave = heart.waves;
+		int spawned = heart.spawnAround(serverLevel, r -> waveType(wave, r), size, 6, 14, player);
+		if (wave % 2 == 1) {
+			spawned += heart.spawnAround(serverLevel, r -> ModContent.SCREAMER, 1, 8, 14, player);
+		}
+
+		if (wave >= 3 && wave % 3 == 0) {
+			spawned += heart.spawnAround(serverLevel, r -> ModContent.PLAGUE_JUGGERNAUT, 1, 9, 14, player);
 		}
 
 		heart.waves++;
@@ -91,15 +96,31 @@ public class PlagueHeartBlockEntity extends BlockEntity {
 		}
 
 		defendCooldown = DEFEND_INTERVAL;
-		int spawned = spawnAround(level, EntityTypes.ZOMBIE, 2 + Math.min(waves / 2, 3), 2, 5, attacker);
+		int spawned = spawnAround(level, r -> waves >= 3 && r.nextInt(3) == 0 ? ModContent.PLAGUE_FERAL : ModContent.PLAGUE_ZOMBIE, 2 + Math.min(waves / 2, 3), 2, 5, attacker);
 		BlockPos pos = getBlockPos();
 		level.playSound(null, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, SoundEvents.CREAKING_HEART_HURT, SoundSource.HOSTILE, 3.0F, 0.6F);
 		tell(level, pos, Component.translatable("message.sodcraft.defend"));
 		SodCraft.LOG.info("plague heart at {} defends: {} spawned", pos.toShortString(), spawned);
 	}
 
-	/** Spawn up to `count` mobs on free ground `minR`..`maxR` blocks around the heart, hunting `target`. */
-	private <T extends Mob> int spawnAround(final ServerLevel level, final EntityType<T> type, final int count, final int minR, final int maxR, final Player target) {
+	/** What a wave is made of: plague zombies and plain ones, ferals and bloaters from wave 2, plague ferals from wave 3. */
+	private static EntityType<? extends Mob> waveType(final int wave, final RandomSource random) {
+		int r = random.nextInt(100);
+		if (wave >= 2 && r < 12) {
+			return ModContent.FERAL;
+		}
+		if (wave >= 2 && r < 24) {
+			return ModContent.BLOATER;
+		}
+		if (wave >= 3 && r < 32) {
+			return ModContent.PLAGUE_FERAL;
+		}
+		return r < 70 ? ModContent.PLAGUE_ZOMBIE : EntityTypes.ZOMBIE;
+	}
+
+	/** Spawn up to `count` mobs (each type picked by `types`) on free ground `minR`..`maxR` blocks around the heart, hunting `target`. */
+	private int spawnAround(final ServerLevel level, final java.util.function.Function<RandomSource, EntityType<? extends Mob>> types, final int count, final int minR,
+		final int maxR, final Player target) {
 		RandomSource random = level.getRandom();
 		BlockPos center = getBlockPos();
 		int spawned = 0;
@@ -111,7 +132,7 @@ public class PlagueHeartBlockEntity extends BlockEntity {
 				continue;
 			}
 
-			T mob = type.spawn(level, ground, EntitySpawnReason.EVENT);
+			Mob mob = types.apply(random).spawn(level, ground, EntitySpawnReason.EVENT);
 			if (mob == null) {
 				continue;
 			}

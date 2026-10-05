@@ -1,0 +1,14 @@
+{
+	"type": "minecraft:crafting_shapeless",
+	"ingredients": [
+		"sodcraft:plague_sample",
+		"sodcraft:plague_sample",
+		"sodcraft:plague_sample",
+		"minecraft:glass_bottle",
+		"minecraft:sugar"
+	],
+	"result": {
+		"id": "sodcraft:plague_cure",
+		"count": 1
+	}
+}

@@ -2,15 +2,24 @@ package com.sodcraft;
 
 import com.sodcraft.block.PlagueHeartBlock;
 import com.sodcraft.block.PlagueHeartBlockEntity;
+import com.sodcraft.effect.BloodPlague;
+import com.sodcraft.entity.ArmoredZombie;
+import com.sodcraft.entity.Bloater;
+import com.sodcraft.entity.Feral;
+import com.sodcraft.entity.Juggernaut;
 import com.sodcraft.entity.Screamer;
+import com.sodcraft.entity.SodZombie;
+import com.sodcraft.item.PlagueCureItem;
 import com.sodcraft.item.GunItem;
 import net.fabricmc.fabric.api.object.builder.v1.block.entity.FabricBlockEntityTypeBuilder;
+import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
+import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
@@ -56,7 +65,27 @@ public final class ModContent {
 	public static final Item RIFLE = item("rifle", p -> new GunItem(new GunItem.Stats(5, 12.0F, 96.0, 20, 50, 56.0, 6.0F, 0.3F, 0.8F),
 		() -> ModContent.RIFLE_AMMO, p), new Item.Properties());
 
+	public static final Holder<MobEffect> BLOOD_PLAGUE = Registry.registerForHolder(BuiltInRegistries.MOB_EFFECT, SodCraft.id("blood_plague"),
+		new BloodPlague());
+	public static final Item PLAGUE_SAMPLE = item("plague_sample", Item::new, new Item.Properties());
+	public static final Item PLAGUE_CURE = item("plague_cure", PlagueCureItem::new, new Item.Properties().stacksTo(16));
+
+	public static final EntityType<SodZombie> PLAGUE_ZOMBIE = zombie("plague_zombie", (t, l) -> new SodZombie(t, l, true));
+	public static final EntityType<Feral> FERAL = zombie("feral", (t, l) -> new Feral(t, l, false));
+	public static final EntityType<Feral> PLAGUE_FERAL = zombie("plague_feral", (t, l) -> new Feral(t, l, true));
+	public static final EntityType<Bloater> BLOATER = zombie("bloater", Bloater::new);
+	public static final EntityType<Juggernaut> JUGGERNAUT = zombie("juggernaut", (t, l) -> new Juggernaut(t, l, false));
+	public static final EntityType<Juggernaut> PLAGUE_JUGGERNAUT = zombie("plague_juggernaut", (t, l) -> new Juggernaut(t, l, true));
+	public static final EntityType<ArmoredZombie> ARMORED_ZOMBIE = zombie("armored_zombie", ArmoredZombie::new);
+
 	private ModContent() {
+	}
+
+	/** Zombie-sized; bigger freaks grow through their SCALE attribute. */
+	private static <T extends SodZombie> EntityType<T> zombie(final String name, final EntityType.EntityFactory<T> factory) {
+		ResourceKey<EntityType<?>> key = ResourceKey.create(Registries.ENTITY_TYPE, SodCraft.id(name));
+		return Registry.register(BuiltInRegistries.ENTITY_TYPE, key, EntityType.Builder.<T>of(factory, MobCategory.MONSTER)
+			.sized(0.6F, 1.95F).eyeHeight(1.74F).clientTrackingRange(8).build(key));
 	}
 
 	private static Item item(final String name, final java.util.function.Function<Item.Properties, Item> factory, final Item.Properties properties) {

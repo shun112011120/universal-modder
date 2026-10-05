@@ -178,7 +178,79 @@ def guns():
         "................"], AMMO_PALETTE, 6)
 
 
+def zombie_skin(name, skin, shirt, pants, eyes, mouth=(30, 8, 8), blood=None, seed=1, bulk=False):
+    """A 64x64 skin on the zombie layout: flat colours with noise, eyes and mouth on the head's front face."""
+    rng = random.Random(seed)
+    px = [[(0, 0, 0, 0)] * 64 for _ in range(64)]
+
+    def fill(x0, y0, x1, y1, color, amount=12):
+        for y in range(y0, y1):
+            for x in range(x0, x1):
+                px[y][x] = jitter(rng, color, amount)
+
+    fill(0, 0, 32, 16, skin)
+    fill(16, 16, 40, 32, shirt)
+    fill(40, 16, 56, 32, skin)
+    fill(32, 48, 48, 64, skin)
+    fill(0, 16, 16, 32, pants)
+    fill(16, 48, 32, 64, pants)
+    if bulk:  # boils / swelling
+        for _ in range(40):
+            x, y = rng.choice([(rng.randrange(16, 40), rng.randrange(16, 32)), (rng.randrange(0, 32), rng.randrange(0, 16))])
+            px[y][x] = jitter(rng, (196, 186, 92), 10)
+    if blood:
+        for _ in range(60):
+            x, y = rng.randrange(16, 40), rng.randrange(16, 32)
+            px[y][x] = jitter(rng, blood, 14)
+        for _ in range(12):
+            px[rng.randrange(8, 16)][rng.randrange(8, 16)] = jitter(rng, blood, 10)
+    for x, y in ((9, 11), (10, 11), (13, 11), (14, 11)):
+        px[y][x] = eyes + (255,)
+    for y in range(13, 15):
+        for x in range(10, 14):
+            px[y][x] = mouth + (255,)
+    write_png(ASSETS / f"entity/{name}.png", px, 64, 64)
+
+
+RED_EYES = (230, 30, 30)
+DEAD_EYES = (210, 205, 150)
+
+
+def zombies():
+    zombie_skin("plague_zombie", (104, 120, 92), (80, 40, 40), (52, 52, 70), RED_EYES, blood=(140, 14, 22), seed=21)
+    zombie_skin("feral", (78, 74, 70), (40, 36, 34), (34, 34, 40), DEAD_EYES, mouth=(150, 20, 24), seed=22)
+    zombie_skin("plague_feral", (82, 66, 64), (52, 24, 24), (34, 30, 34), RED_EYES, mouth=(170, 20, 24), blood=(150, 16, 24), seed=23)
+    zombie_skin("bloater", (150, 160, 86), (110, 112, 70), (70, 74, 54), DEAD_EYES, mouth=(70, 80, 20), seed=24, bulk=True)
+    zombie_skin("juggernaut", (120, 116, 110), (60, 58, 56), (44, 44, 48), DEAD_EYES, seed=25)
+    zombie_skin("plague_juggernaut", (124, 92, 88), (70, 30, 30), (44, 36, 40), RED_EYES, blood=(150, 16, 24), seed=26)
+    zombie_skin("armored_zombie", (100, 116, 96), (28, 34, 54), (24, 28, 44), DEAD_EYES, seed=27)
+
+
+def plague_items():
+    pal = {"g": (190, 200, 210), "w": (230, 236, 240), "r": (150, 16, 28), "R": (210, 40, 50), "c": (110, 80, 50),
+           "G": (90, 190, 120), "l": (150, 230, 170)}
+    sprite("plague_sample", [
+        "................", "................", "......cc........", "......cc........", ".....gwwg.......", ".....grRg.......",
+        ".....grRg.......", ".....grrg.......", ".....grrg.......", ".....grrg.......", ".....grrg.......", "......gg........",
+        "................", "................", "................", "................"], pal, 31)
+    sprite("plague_cure", [
+        "................", "......cc........", "......cc........", "......gg........", ".....g..g.......", "....g....g......",
+        "...gGGGGGGg.....", "...gGlGGGGg.....", "...gGGlGGGg.....", "...gGGGGGGg.....", "...gGGGGGGg.....", "....gGGGGg......",
+        ".....gggg.......", "................", "................", "................"], pal, 32)
+    rng = random.Random(33)  # mob effect icon, 18x18
+    px = [[(0, 0, 0, 0)] * 18 for _ in range(18)]
+    for y in range(18):
+        for x in range(18):
+            d = ((x - 8.5) ** 2 + (y - 9.5) ** 2) ** 0.5
+            if d < 6.5 or (y < 9 and abs(x - 8.5) < 2.5 and y > 1):
+                px[y][x] = jitter(rng, (150, 16, 28) if d > 3 else (220, 60, 60), 10)
+    ASSETS.joinpath("mob_effect").mkdir(parents=True, exist_ok=True)
+    write_png(ASSETS / "mob_effect/blood_plague.png", px, 18, 18)
+
+
 if __name__ == "__main__":
     plague_heart()
     screamer()
     guns()
+    zombies()
+    plague_items()

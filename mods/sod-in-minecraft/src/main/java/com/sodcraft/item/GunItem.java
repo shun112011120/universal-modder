@@ -1,6 +1,7 @@
 package com.sodcraft.item;
 
 import com.sodcraft.SodCraft;
+import com.sodcraft.entity.ArmoredZombie;
 import java.util.function.Supplier;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
@@ -100,6 +101,10 @@ public class GunItem extends Item {
 
 		if (hit != null && hit.getEntity() instanceof LivingEntity target) {
 			boolean headshot = impact.y >= target.getEyeY() - 0.3;
+			if (headshot && target instanceof ArmoredZombie) {
+				headshot = false; // the riot helmet takes it
+				player.sendOverlayMessage(Component.translatable("message.sodcraft.armored"));
+			}
 			target.damageCooldownTime = 0; // fast fire lands inside the usual hurt cooldown
 			target.hurtServer(level, level.damageSources().playerAttack(player), headshot ? (float) (stats.damage() * HEADSHOT) : stats.damage());
 			level.sendParticles(ParticleTypes.CRIT, impact.x, impact.y, impact.z, headshot ? 14 : 6, 0.1, 0.1, 0.1, 0.2);

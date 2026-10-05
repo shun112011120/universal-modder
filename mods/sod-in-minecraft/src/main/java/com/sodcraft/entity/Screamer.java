@@ -22,7 +22,7 @@ import net.minecraft.world.level.Level;
  * A weak zombie that screams when it sees you: every zombie within CALL_RANGE comes for you, and if you're close the
  * scream staggers you (slowness + nausea). Then it needs SCREAM_COOLDOWN ticks to recover.
  */
-public class Screamer extends Zombie {
+public class Screamer extends SodZombie {
 	private static final double SEE_RANGE = 24.0;
 	private static final double CALL_RANGE = 40.0;
 	private static final double STAGGER_RANGE = 10.0;
@@ -31,11 +31,11 @@ public class Screamer extends Zombie {
 	private int screamCooldown = 40;
 
 	public Screamer(final EntityType<? extends Zombie> type, final Level level) {
-		super(type, level);
+		super(type, level, false);
 	}
 
 	public static AttributeSupplier.Builder createAttributes() {
-		return Zombie.createAttributes()
+		return base()
 			.add(Attributes.MAX_HEALTH, 14.0)
 			.add(Attributes.ATTACK_DAMAGE, 1.0)
 			.add(Attributes.MOVEMENT_SPEED, 0.2)
@@ -81,9 +81,4 @@ public class Screamer extends Zombie {
 		SodCraft.LOG.info("screamer at {} called {} zombies", blockPosition().toShortString(), horde.size());
 	}
 
-	/** Screamers stay screamers underwater (zombies would turn into drowned). */
-	@Override
-	protected boolean convertsInWater() {
-		return false;
-	}
 }

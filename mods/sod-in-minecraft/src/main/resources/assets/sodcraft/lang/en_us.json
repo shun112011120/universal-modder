@@ -11,5 +11,22 @@
 	"item.sodcraft.rifle_ammo": "Rifle Rounds",
 	"message.sodcraft.headshot": "Headshot!",
 	"message.sodcraft.no_ammo": "Out of ammo: no %s",
-	"message.sodcraft.reloaded": "Reloaded %s/%s"
+	"message.sodcraft.reloaded": "Reloaded %s/%s",
+	"entity.sodcraft.plague_zombie": "Plague Zombie",
+	"entity.sodcraft.feral": "Feral",
+	"entity.sodcraft.plague_feral": "Plague Feral",
+	"entity.sodcraft.bloater": "Bloater",
+	"entity.sodcraft.juggernaut": "Juggernaut",
+	"entity.sodcraft.plague_juggernaut": "Plague Juggernaut",
+	"entity.sodcraft.armored_zombie": "Armored Zombie",
+	"effect.sodcraft.blood_plague": "Blood Plague",
+	"item.sodcraft.plague_sample": "Plague Sample",
+	"item.sodcraft.plague_cure": "Plague Cure",
+	"message.sodcraft.plague": "Blood plague: %s%%",
+	"message.sodcraft.plague_full": "Blood plague %s%%: you're turning! Take a plague cure",
+	"message.sodcraft.not_infected": "You don't have blood plague",
+	"message.sodcraft.cured": "Blood plague cured",
+	"message.sodcraft.pinned": "A feral pinned you!",
+	"message.sodcraft.thrown": "A juggernaut threw you!",
+	"message.sodcraft.armored": "Armored: the helmet stopped the headshot"
 }
