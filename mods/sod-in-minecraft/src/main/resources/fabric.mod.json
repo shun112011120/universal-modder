@@ -1,0 +1,20 @@
+{
+	"schemaVersion": 1,
+	"id": "sodcraft",
+	"version": "${version}",
+	"name": "SoDcraft",
+	"description": "State of Decay 2 ideas rebuilt from scratch for Minecraft: Plague Hearts that send zombie waves at night, and Screamers that call the horde. No State of Decay files are used.",
+	"authors": ["shun112011120"],
+	"license": "MIT",
+	"environment": "*",
+	"entrypoints": {
+		"main": ["com.sodcraft.SodCraft"],
+		"client": ["com.sodcraft.client.SodCraftClient"]
+	},
+	"depends": {
+		"fabricloader": ">=0.19.5",
+		"minecraft": "~26.3",
+		"java": ">=25",
+		"fabric-api": "*"
+	}
+}

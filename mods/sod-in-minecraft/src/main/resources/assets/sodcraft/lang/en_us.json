@@ -1,0 +1,8 @@
+{
+	"block.sodcraft.plague_heart": "Plague Heart",
+	"entity.sodcraft.screamer": "Screamer",
+	"message.sodcraft.wave": "The Plague Heart calls the horde (wave %s)",
+	"message.sodcraft.defend": "The Plague Heart lashes out!",
+	"message.sodcraft.heart_destroyed": "Plague Heart destroyed!",
+	"message.sodcraft.scream": "A Screamer called %s zombies!"
+}

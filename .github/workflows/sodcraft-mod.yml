@@ -1,0 +1,27 @@
+name: sodcraft mod
+on:
+  push:
+    paths: ["mods/sod-in-minecraft/**", ".github/workflows/sodcraft-mod.yml"]
+  pull_request:
+    paths: ["mods/sod-in-minecraft/**", ".github/workflows/sodcraft-mod.yml"]
+  workflow_dispatch:
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: mods/sod-in-minecraft
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "25"
+      - uses: gradle/actions/setup-gradle@v4
+      - name: build
+        run: chmod +x gradlew && ./gradlew build --console=plain --stacktrace
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sodcraft-mod
+          path: mods/sod-in-minecraft/build/libs/*.jar
+          if-no-files-found: error

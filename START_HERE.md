@@ -13,7 +13,7 @@ owner has copied it in. It's git-ignored: read it, never commit it.
 - Short, practical answers.
 - The GPU has 8 GB: never run the Ollama chat model and ComfyUI at the same time.
 
-## Where we are (2026-10-03)
+## Where we are (2026-10-05)
 **The toolkit and the desktop app are done and tested.** Branch `claude/inspect-this-1wnu0l`.
 - `um app` / `UniversalModder.exe` / `Universal Modder.cmd`: a portable desktop app (everything stays in this
   folder). Screens: Chat, Games, Art, Backups, Publish check, Settings.
@@ -26,29 +26,29 @@ owner has copied it in. It's git-ignored: read it, never commit it.
 - Heavy work (writing whole mods) is done by Claude Code on this PC, started with `Start Claude Code.cmd`.
   The app's local model is for scanning, backups, art and small edits.
 
-**Current project: State of Decay 2 inside Minecraft** (decided, not started).
+**Current project: State of Decay 2 inside Minecraft** (v0.1.0 written, not tested in game yet).
 - Route: a Minecraft **Java** mod (Fabric), pattern 1 of `skills/mashup-mods` ("port the content"): State of
-  Decay 2's ideas rebuilt in Minecraft from scratch, with new art from ComfyUI. Never copy State of Decay files,
-  models, textures or sounds.
-- First slice: a **Plague Heart** block that spawns zombie waves around it at night until destroyed, and a
-  **Screamer** zombie that calls nearby zombies when it sees the player. 16x16 pixel-art textures.
-- Later ideas: freak zombies (Bloater gas cloud, Juggernaut), survivors with traits and morale, an outpost /
-  base-building system, scavenging rucksacks, plague sickness.
-- Unknown yet: the owner's Minecraft Java version (launcher, next to Play), whether Fabric is installed, and
-  whether they also have Bedrock (it can't take this mod).
+  Decay 2's ideas rebuilt in Minecraft from scratch. Never copy State of Decay files, models, textures or sounds.
+- Code: `mods/sod-in-minecraft/` (mod id `sodcraft`, Minecraft **26.3**, Fabric, JDK 25). Its `MODLOG.md` has
+  the versions, what's built and the ideas queue. The "sodcraft mod" workflow builds the jar (artifact
+  `sodcraft-mod`), so the PC needs no JDK or Gradle.
+- Built: **Plague Heart** block (zombie waves at night while a player is near, defenders when hit, stops when
+  destroyed) and **Screamer** zombie (screams when it sees you: calls zombies within 40 blocks, staggers you).
+  Placeholder textures drawn by `mods/sod-in-minecraft/tools/make_placeholder_textures.py`.
+- The owner's PC (2026-10-03): Minecraft Launcher (Xbox app) + Bedrock installed; Java Edition never launched,
+  no Fabric, no Java worlds. Claude Code runs on this PC through the Claude desktop app (Code tab, local session).
 
 ## Next steps
-1. `um scan --list`, then `um scan "State of Decay 2"` and find Minecraft (Java installs live in
-   `%APPDATA%\.minecraft`; the scanner may not list it because it isn't a Steam/Epic/Xbox game).
-2. Ask the owner for the Minecraft Java version; check `%APPDATA%\.minecraft\versions` and `mods`.
-3. Back up the worlds: `um backup create "%APPDATA%\.minecraft\saves" --name minecraft-saves`.
-4. List what's needed and ask before installing: a JDK 21 (or what that Minecraft version needs), the Fabric
-   installer and Fabric API, and the first Gradle build's downloads (about 1-2 GB, one time).
-5. Create the mod in `My Mods\sod-in-minecraft\` (from the Fabric example mod for that version), with a
-   `MODLOG.md`. Build the Plague Heart + Screamer, test in game, read `logs\latest.log` for errors.
-6. Make the textures with ComfyUI (Art screen or the app's `generate_image` tool), then
-   `um sprite pixelate <png> <out> --size 16x16 --colors 16`.
-7. When it works: `um publish check` on the mod folder, and a field note with `um kb new` (ask before a PR).
+1. Get the "sodcraft mod" workflow green (read its log, fix compile errors).
+2. Owner: confirm they own Java Edition, launch **26.3** once from the launcher. Then (ask first) install Fabric
+   Loader 0.19.5 for 26.3 (fabric-installer; with the Xbox launcher add the profile to `launcher_profiles.json` by
+   hand, with its own `gameDir`; see `knowledge/games/gta-v/minecraft-passthrough.md` gotcha 3) and put Fabric
+   API 0.161.0+26.3 and the sodcraft jar in that game dir's `mods\`.
+3. Back up worlds before modded launches: `um backup create <gameDir>\saves --name minecraft-saves`.
+4. Test in game (steps in `mods/sod-in-minecraft/MODLOG.md`), read `<gameDir>\logs\latest.log`, fix.
+5. ComfyUI textures (Art screen), then `um sprite pixelate <png> <out> --size 16x16 --colors 16`.
+6. Next freaks: Bloater, Feral, Juggernaut; then blood plague.
+7. When it works: `um publish check`, a field note with `um kb new` (ask before a PR).
 
 ## Known issues in the toolkit (from the 2026-10-03 inspection, not fixed yet)
 - `um scan` flags any game with "rust" in its name as an online game (substring match in `ONLINE_ONLY`).
