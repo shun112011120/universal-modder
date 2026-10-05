@@ -4,5 +4,12 @@
 	"message.sodcraft.wave": "The Plague Heart calls the horde (wave %s)",
 	"message.sodcraft.defend": "The Plague Heart lashes out!",
 	"message.sodcraft.heart_destroyed": "Plague Heart destroyed!",
-	"message.sodcraft.scream": "A Screamer called %s zombies!"
+	"message.sodcraft.scream": "A Screamer called %s zombies!",
+	"item.sodcraft.pistol": "Pistol",
+	"item.sodcraft.rifle": "Hunting Rifle",
+	"item.sodcraft.pistol_ammo": "Pistol Rounds",
+	"item.sodcraft.rifle_ammo": "Rifle Rounds",
+	"message.sodcraft.headshot": "Headshot!",
+	"message.sodcraft.no_ammo": "Out of ammo: no %s",
+	"message.sodcraft.reloaded": "Reloaded %s/%s"
 }

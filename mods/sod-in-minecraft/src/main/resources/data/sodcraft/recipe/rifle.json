@@ -1,0 +1,16 @@
+{
+	"type": "minecraft:crafting_shaped",
+	"pattern": [
+		"III",
+		"PT "
+	],
+	"key": {
+		"I": "minecraft:iron_ingot",
+		"T": "minecraft:tripwire_hook",
+		"P": "#minecraft:planks"
+	},
+	"result": {
+		"id": "sodcraft:rifle",
+		"count": 1
+	}
+}

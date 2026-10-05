@@ -38,7 +38,37 @@ Journal for the mod. It becomes the field note at the end (`um kb new`).
   cooldown. Doesn't turn into a drowned.
 - Placeholder textures: 16x16 heart block, 64x64 Screamer skin on the zombie layout.
 
-## How to test (survival test world, difficulty Normal, cheats on)
+## 2026-10-05: first in-game test of v0.1.0, and a new direction
+- Setup (agent): launcher profile "SoDcraft" (Fabric Loader 0.19.5 for 26.3, profile json from meta.fabricmc.net +
+  empty jar, the way fabric-installer does it; `launcher_profiles.json` backed up as
+  `launcher_profiles.json.before-sodcraft`). Its own game dir: `<repo>/My Mods/minecraft-sodcraft` (git-ignored), with
+  Fabric API 0.161.0+26.3 and the CI-built `sodcraft-0.1.0.jar` in `mods/`. No crash; "sodcraft loaded" in the log.
+- No Plague Heart lines in the log: unclear whether the heart was placed (the player was killed by a husk).
+  `/gamemode survival` came back "unknown or incomplete" on 26.3; use `/gamemode survival @s`.
+- Owner's verdict: "doesn't feel like SoD at all". They want SoD2's character, movement and guns.
+- Decisions:
+  - Build SoD2's gameplay into Minecraft now (guns, then over-the-shoulder camera, stamina, dodge, survivor model).
+  - Try the GTA-style passthrough (Minecraft blocks inside SoD2) later, starting with a feasibility test: does
+    ReShade / UE4SS load into the Xbox app copy (its exe is unreadable from outside)?
+  - **The owner allows SoD2's own models, textures and sounds, converted locally from their install, for personal
+    use only.** Rule: anything taken from SoD2 goes to `My Mods/` (git-ignored), never into this repo, a release or
+    a PR; `um publish check` before every push.
+
+## v0.2.0: guns
+- `GunItem`: hitscan (block clip + entity ray), magazine = durability bar, crouch + right-click or empty trigger
+  reloads from inventory ammo, recoil kicks the camera (client side), spread, spark tracer, muzzle smoke, headshots
+  (hit above eye height - 0.3) x2.5. Every shot alerts zombies in earshot (SoD2's noise rule). Creative: no ammo use.
+  - Pistol: 12 rounds, 5 dmg, fire every 5 ticks, heard at 32 blocks. Recipe: `III / T` (iron, tripwire hook).
+  - Hunting rifle: 5 rounds, 12 dmg, every 20 ticks, heard at 56 blocks. Recipe: `III / PT` (+ planks).
+  - Ammo: iron + gunpowder = 12 pistol rounds; iron + 2 gunpowder = 6 rifle rounds.
+- Plague Heart logs when placed and every 30 s while a player is near (dark outside? next wave?).
+
+### Test v0.2.0
+`/give @s sodcraft:pistol`, `/give @s sodcraft:pistol_ammo 64`, `/give @s sodcraft:rifle`, `/give @s sodcraft:rifle_ammo 32`,
+`/gamemode survival @s`. Right-click shoots, crouch + right-click reloads. Shoot near zombies: they all turn on you.
+Then the Plague Heart test again (place it, `/time set night`).
+
+## How to test (v0.1 features) (survival test world, difficulty Normal, cheats on)
 1. `/give @s sodcraft:plague_heart`, place it on open flat ground, step ~10 blocks back.
 2. `/time set night`. Within 1-2 s: "The Plague Heart calls the horde (wave 1)" and 3 zombies rise in smoke
    6-14 blocks from the heart. Wave 2 (30 s later) has 4 zombies + a Screamer.
@@ -50,6 +80,6 @@ Journal for the mod. It becomes the field note at the end (`um kb new`).
 Zombies ignore creative mode, so test in survival (`/gamemode survival`).
 
 ## Ideas queue
-Bloater (gas cloud on death), Juggernaut (tanky, throws), Feral (fast lunge), blood plague (builds up from hits,
+Over-the-shoulder camera, stamina (sprint, melee), dodge, survivor player model; SoD2 asset converter (local only); Bloater (gas cloud on death), Juggernaut (tanky, throws), Feral (fast lunge), blood plague (builds up from hits,
 cured by an item), Plague Hearts that get tougher per kill, natural Screamer spawns, ComfyUI textures, survivors,
 morale, outposts, resources.

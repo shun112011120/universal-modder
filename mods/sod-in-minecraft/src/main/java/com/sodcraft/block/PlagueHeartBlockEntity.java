@@ -56,6 +56,11 @@ public class PlagueHeartBlockEntity extends BlockEntity {
 		heart.waveCooldown = Math.max(0, heart.waveCooldown - 20);
 
 		Player player = serverLevel.getNearestPlayer(cx, cy, cz, ACTIVE_RANGE, false);
+		if (heart.age % 600 == 0) {
+			SodCraft.LOG.info("plague heart at {}: player near: {}, dark outside: {}, next wave in {} s", pos.toShortString(), player != null,
+				serverLevel.isDarkOutside(), heart.waveCooldown / 20);
+		}
+
 		if (player == null || !serverLevel.isDarkOutside() || heart.waveCooldown > 0) {
 			return;
 		}

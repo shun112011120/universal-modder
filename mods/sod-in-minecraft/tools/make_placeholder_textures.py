@@ -96,6 +96,89 @@ def screamer():
     write_png(ASSETS / "entity/screamer.png", px, w, h)
 
 
+def sprite(name, rows, palette, seed):
+    """A 16x16 item sprite from 16 strings of palette keys ('.' = transparent)."""
+    rng = random.Random(seed)
+    px = [[jitter(rng, palette[c], 8) if c != "." else (0, 0, 0, 0) for c in row.ljust(16, ".")] for row in rows]
+    write_png(ASSETS / f"item/{name}.png", px, 16, 16)
+
+
+GUN_PALETTE = {"k": (34, 34, 38), "g": (78, 80, 86), "l": (130, 134, 140), "w": (110, 72, 40), "d": (70, 44, 24)}
+AMMO_PALETTE = {"b": (196, 150, 60), "y": (232, 196, 96), "c": (120, 80, 40), "k": (48, 40, 30), "s": (150, 150, 150)}
+
+
+def guns():
+    sprite("pistol", [
+        "................",
+        "................",
+        "................",
+        "....llllllllll..",
+        "...lggggggggggk.",
+        "...gkkkkkkkkkkk.",
+        "...ggggggggggk..",
+        "...gkk.k........",
+        "...ggk..k.......",
+        "...gggkk........",
+        "...ggk..........",
+        "..gggk..........",
+        "..gggk..........",
+        "..kkkk..........",
+        "................",
+        "................"], GUN_PALETTE, 3)
+    sprite("rifle", [
+        "................",
+        "................",
+        "................",
+        "......kk........",
+        ".....kllk.......",
+        "wwwwwgggggllllll",
+        "wddwwgkkkkkkkkkk",
+        "wddwggkgg.......",
+        "wwww..kk........",
+        "ww....k.........",
+        "................",
+        "................",
+        "................",
+        "................",
+        "................",
+        "................"], GUN_PALETTE, 4)
+    sprite("pistol_ammo", [
+        "................",
+        "................",
+        "................",
+        "....y..y..y.....",
+        "...yby.yby.yb...",
+        "...bbb.bbb.bb...",
+        "...bbb.bbb.bb...",
+        "...ccc.ccc.cc...",
+        "..kkkkkkkkkkkk..",
+        "..kssssssssssk..",
+        "..kssssssssssk..",
+        "..kkkkkkkkkkkk..",
+        "................",
+        "................",
+        "................",
+        "................"], AMMO_PALETTE, 5)
+    sprite("rifle_ammo", [
+        "................",
+        ".....y....y.....",
+        "....yby..yby....",
+        "....bbb..bbb....",
+        "....bbb..bbb....",
+        "....bbb..bbb....",
+        "....bbb..bbb....",
+        "....bbb..bbb....",
+        "....ccc..ccc....",
+        "..kkkkkkkkkkkk..",
+        "..kssssssssssk..",
+        "..kssssssssssk..",
+        "..kkkkkkkkkkkk..",
+        "................",
+        "................",
+        "................"], AMMO_PALETTE, 6)
+
+
 if __name__ == "__main__":
     plague_heart()
     screamer()
+    guns()
