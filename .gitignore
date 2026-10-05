@@ -20,3 +20,8 @@ dist/
 /.uv/
 # the owner's personal setup notes, read by agents (START_HERE.md)
 SETUP_SUMMARY.md
+# the packaged Windows app, when its files are put in the clone (shares data/ and My Mods/ with Universal Modder.cmd)
+/UniversalModder.exe
+/um.exe
+/_internal/
+/Windows app - read me.txt

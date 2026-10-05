@@ -25,10 +25,11 @@ owner has copied it in. It's git-ignored: read it, never commit it.
     "Universal Modder (Windows)").
 - Heavy work (writing whole mods) is done by Claude Code on this PC, started with `Start Claude Code.cmd`.
   The app's local model is for scanning, backups, art and small edits.
-- **One folder** (owner's choice, 2026-10-05): this clone is the whole workflow. The owner runs the app with
-  `Universal Modder.cmd` from here (uv, Python and libraries in `.uv/` and `.venv/`, settings in `data/`, app
-  workspace in `My Mods/`, all git-ignored); the separate `.exe` folder was retired. Mods Claude builds live in
-  `mods/` and are committed. Local checks: `.uv\bin\uv.exe run --with pytest pytest -q tests` (with the
+- **One folder** (owner's choice, 2026-10-05): this clone is the whole workflow. The packaged app
+  (`UniversalModder.exe`, `um.exe`, `_internal/`) sits in the clone's root, so it shares `data/` (settings) and
+  `My Mods/` with `Universal Modder.cmd` (uv/Python in `.uv/`, `.venv/`); all of these are git-ignored. A Desktop
+  shortcut points at the `.exe`. After app code changes, replace those three with a fresh "windows app" build
+  (or use the `.cmd`, which always runs the current code). Mods Claude builds live in `mods/` and are committed. Local checks: `.uv\bin\uv.exe run --with pytest pytest -q tests` (with the
   launcher's `UV_*` variables); on Windows `tests/test_um.py` fails at collection (it calls `which`) and
   `um kb check` reports `INDEX.md` stale because of CRLF checkouts. Both pass in CI.
 
