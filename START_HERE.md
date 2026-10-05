@@ -34,8 +34,10 @@ owner has copied it in. It's git-ignored: read it, never commit it.
   `um kb check` reports `INDEX.md` stale because of CRLF checkouts. Both pass in CI.
 
 **Current project: State of Decay 2 inside Minecraft** (v0.1.0 written, not tested in game yet).
-- Route: a Minecraft **Java** mod (Fabric), pattern 1 of `skills/mashup-mods` ("port the content"): State of
-  Decay 2's ideas rebuilt in Minecraft from scratch. Never copy State of Decay files, models, textures or sounds.
+- Route: a Minecraft **Java** mod (Fabric), pattern 1 of `skills/mashup-mods` ("port the content"): a game-to-game
+  merge. **SoD2's real models, textures and sounds are wanted**, extracted from the owner's install into `My Mods/`
+  (git-ignored) by a local converter; the public repo holds only code. Next: guns (v0.2, built), over-the-shoulder
+  camera + stamina + dodge, the SoD2 asset converter, then the GTA-style passthrough test (Minecraft inside SoD2).
 - Code: `mods/sod-in-minecraft/` (mod id `sodcraft`, Minecraft **26.3**, Fabric, JDK 25). Its `MODLOG.md` has
   the versions, what's built and the ideas queue. The "sodcraft mod" workflow builds the jar (artifact
   `sodcraft-mod`), so the PC needs no JDK or Gradle.

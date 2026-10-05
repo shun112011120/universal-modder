@@ -3,12 +3,14 @@
 # makes goes into data/ and My Mods/ next to the exes (packaging/app_entry.py).
 #   uv run --with pyinstaller pyinstaller --noconfirm packaging/universal-modder.spec   ->  dist/Universal Modder/
 # .github/workflows/windows-app.yml builds it on every change and uploads it as an artifact.
+import sys
 from pathlib import Path
 
 ROOT = Path(SPECPATH).parent
 datas = [(str(ROOT / "um" / d), f"um/{d}") for d in ("app_ui", "fonts", "ps1", "blender")]
 datas += [(str(ROOT / "skills"), "skills"), (str(ROOT / "knowledge"), "knowledge")]
-groups = ["scan", "fal", "sprite", "render3d", "video", "win", "backup", "publish", "kb", "app"]   # imported by name in um/cli.py
+sys.path.insert(0, str(ROOT))
+from um.cli import GROUPS as groups  # noqa: E402  imported by name in um/cli.py, so PyInstaller can't see them
 
 a = Analysis([str(ROOT / "packaging" / "app_entry.py")], pathex=[str(ROOT)], datas=datas,
              hiddenimports=[f"um.{g}" for g in groups] + ["yaml"], excludes=["pytest"])

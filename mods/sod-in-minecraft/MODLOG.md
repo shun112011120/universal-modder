@@ -3,9 +3,10 @@
 Journal for the mod. It becomes the field note at the end (`um kb new`).
 
 ## Setup
-- **Route:** pattern 1 of `skills/mashup-mods` ("port the content"). State of Decay 2's ideas are rebuilt from
-  scratch as Minecraft content. No State of Decay files, models, textures or sounds; only vanilla Minecraft
-  sounds and particles, and textures drawn by `tools/make_placeholder_textures.py` (ComfyUI art later).
+- **Route:** pattern 1 of `skills/mashup-mods` ("port the content"): State of Decay 2 merged into Minecraft. The
+  mechanics are reimplemented in Fabric; the look and sound come from the owner's own SoD2 install through a local
+  converter (see 2026-10-05). The repo ships code only; placeholder art is drawn by
+  `tools/make_placeholder_textures.py`.
 - **Versions** (checked on meta.fabricmc.net / maven.fabricmc.net on 2026-10-05; the same set builds
   `examples/minecraft-gta5-passthrough`): Minecraft Java **26.3** (newest stable; ships unobfuscated, so no
   mappings), Fabric Loader 0.19.5, Fabric API 0.161.0+26.3, Loom 1.18.2, Gradle 9.7.1, JDK 25.
@@ -50,9 +51,12 @@ Journal for the mod. It becomes the field note at the end (`um kb new`).
   - Build SoD2's gameplay into Minecraft now (guns, then over-the-shoulder camera, stamina, dodge, survivor model).
   - Try the GTA-style passthrough (Minecraft blocks inside SoD2) later, starting with a feasibility test: does
     ReShade / UE4SS load into the Xbox app copy (its exe is unreadable from outside)?
-  - **The owner allows SoD2's own models, textures and sounds, converted locally from their install, for personal
-    use only.** Rule: anything taken from SoD2 goes to `My Mods/` (git-ignored), never into this repo, a release or
-    a PR; `um publish check` before every push.
+  - **Using SoD2's real content is the point of the project** (owner, 2026-10-05: "it was supposed to seem like a
+    merge from game to game"). The early "never copy SoD2 files" line came from a session summary, not the owner's
+    intent. SoD2's models, textures, sounds, guns and characters are extracted from the owner's own install and used
+    in their Minecraft. Only the storage is limited: extracted files live in `My Mods/` (git-ignored, on the PC),
+    never in this public repo, a release or a PR; the repo holds the mod code and the converter. `um publish check`
+    before every push.
 
 ## v0.2.0: guns
 - `GunItem`: hitscan (block clip + entity ray), magazine = durability bar, crouch + right-click or empty trigger
