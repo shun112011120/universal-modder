@@ -11,6 +11,9 @@
 		"main": ["com.sodcraft.SodCraft"],
 		"client": ["com.sodcraft.client.SodCraftClient"]
 	},
+	"mixins": [
+		{"config": "sodcraft.client.mixins.json", "environment": "client"}
+	],
 	"depends": {
 		"fabricloader": ">=0.19.5",
 		"minecraft": "~26.3",

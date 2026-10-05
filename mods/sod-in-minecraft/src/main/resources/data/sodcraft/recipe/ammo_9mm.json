@@ -1,0 +1,11 @@
+{
+	"type": "minecraft:crafting_shapeless",
+	"ingredients": [
+		"minecraft:iron_ingot",
+		"minecraft:gunpowder"
+	],
+	"result": {
+		"id": "sodcraft:ammo_9mm",
+		"count": 16
+	}
+}

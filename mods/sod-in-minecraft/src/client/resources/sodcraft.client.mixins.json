@@ -1,0 +1,7 @@
+{
+	"required": true,
+	"package": "com.sodcraft.client.mixin",
+	"compatibilityLevel": "JAVA_25",
+	"client": ["SpecialModelRenderersAccessor"],
+	"injectors": { "defaultRequire": 1 }
+}

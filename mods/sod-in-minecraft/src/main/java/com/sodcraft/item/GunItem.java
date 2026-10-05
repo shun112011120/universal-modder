@@ -18,6 +18,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.ProjectileUtil;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ItemUseAnimation;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.BlockHitResult;
@@ -35,7 +36,12 @@ public class GunItem extends Item {
 
 	/** Tuning for one gun. Ticks are 1/20 s; recoil and spread in degrees. */
 	public record Stats(int magazine, float damage, double range, int fireDelay, int reloadTicks, double noise, float recoil, float spread,
-		float pitch) {
+		float pitch, int pellets, boolean auto) {
+		/** A single-shot (semi-automatic) gun. */
+		public Stats(final int magazine, final float damage, final double range, final int fireDelay, final int reloadTicks, final double noise,
+			final float recoil, final float spread, final float pitch) {
+			this(magazine, damage, range, fireDelay, reloadTicks, noise, recoil, spread, pitch, 1, false);
+		}
 	}
 
 	private final Stats stats;
@@ -66,6 +72,15 @@ public class GunItem extends Item {
 			return InteractionResult.CONSUME;
 		}
 
+		shoot(level, player, gun);
+		if (stats.auto()) {
+			player.startUsingItem(hand); // keeps firing while the button is held: onUseTick
+		}
+
+		return InteractionResult.CONSUME;
+	}
+
+	private void shoot(final Level level, final Player player, final ItemStack gun) {
 		if (level instanceof ServerLevel serverLevel) {
 			fire(serverLevel, player, gun);
 		} else {
@@ -74,45 +89,52 @@ public class GunItem extends Item {
 			player.setXRot(player.getXRot() - stats.recoil());
 			player.setYRot(player.getYRot() + (random.nextFloat() - 0.5F) * stats.recoil() * 0.6F);
 		}
+	}
 
-		return InteractionResult.CONSUME;
+	@Override
+	public void onUseTick(final Level level, final LivingEntity user, final ItemStack gun, final int remaining) {
+		if (!(user instanceof Player player) || player.getCooldowns().isOnCooldown(gun)) {
+			return;
+		}
+
+		if (loaded(gun) <= 0) {
+			player.stopUsingItem();
+			if (level instanceof ServerLevel serverLevel) {
+				reload(serverLevel, player, gun);
+			}
+
+			return;
+		}
+
+		shoot(level, player, gun);
+	}
+
+	@Override
+	public int getUseDuration(final ItemStack gun, final LivingEntity user) {
+		return stats.auto() ? 72000 : 0;
+	}
+
+	@Override
+	public ItemUseAnimation getUseAnimation(final ItemStack gun) {
+		return ItemUseAnimation.NONE;
 	}
 
 	private void fire(final ServerLevel level, final Player player, final ItemStack gun) {
-		RandomSource random = player.getRandom();
 		Vec3 eye = player.getEyePosition();
-		Vec3 dir = player.getViewVector(1.0F);
-		double s = Math.toRadians(stats.spread());
-		dir = dir.add((random.nextDouble() - 0.5) * s, (random.nextDouble() - 0.5) * s, (random.nextDouble() - 0.5) * s).normalize();
-		Vec3 end = eye.add(dir.scale(stats.range()));
-
-		BlockHitResult block = level.clip(new ClipContext(eye, end, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, player));
-		if (block.getType() != HitResult.Type.MISS) {
-			end = block.getLocation();
+		Vec3 look = player.getViewVector(1.0F);
+		boolean headshotSeen = false, armoredSeen = false;
+		for (int p = 0; p < stats.pellets(); p++) {
+			int result = pellet(level, player, eye, look);
+			headshotSeen |= result == 2;
+			armoredSeen |= result == 3;
 		}
 
-		EntityHitResult hit = ProjectileUtil.getEntityHitResult(level, player, eye, end, player.getBoundingBox().expandTowards(dir.scale(stats.range())).inflate(1.0),
-			e -> e instanceof LivingEntity && e.isAlive() && !e.isSpectator() && e.isPickable() && e != player, 0.3F);
-
-		Vec3 impact = hit != null ? hit.getLocation() : end;
-		tracer(level, eye.add(dir.scale(1.2)), impact);
-		level.sendParticles(ParticleTypes.SMOKE, eye.x + dir.x * 0.9, eye.y + dir.y * 0.9 - 0.15, eye.z + dir.z * 0.9, 3, 0.03, 0.03, 0.03, 0.01);
+		level.sendParticles(ParticleTypes.SMOKE, eye.x + look.x * 0.9, eye.y + look.y * 0.9 - 0.15, eye.z + look.z * 0.9, 3, 0.03, 0.03, 0.03, 0.01);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.FIREWORK_ROCKET_BLAST, SoundSource.PLAYERS, 3.0F, stats.pitch());
-
-		if (hit != null && hit.getEntity() instanceof LivingEntity target) {
-			boolean headshot = impact.y >= target.getEyeY() - 0.3;
-			if (headshot && target instanceof ArmoredZombie) {
-				headshot = false; // the riot helmet takes it
-				player.sendOverlayMessage(Component.translatable("message.sodcraft.armored"));
-			}
-			target.damageCooldownTime = 0; // fast fire lands inside the usual hurt cooldown
-			target.hurtServer(level, level.damageSources().playerAttack(player), headshot ? (float) (stats.damage() * HEADSHOT) : stats.damage());
-			level.sendParticles(ParticleTypes.CRIT, impact.x, impact.y, impact.z, headshot ? 14 : 6, 0.1, 0.1, 0.1, 0.2);
-			if (headshot) {
-				player.sendOverlayMessage(Component.translatable("message.sodcraft.headshot"));
-			}
-		} else if (block.getType() != HitResult.Type.MISS) {
-			level.sendParticles(ParticleTypes.POOF, impact.x, impact.y, impact.z, 3, 0.05, 0.05, 0.05, 0.01);
+		if (headshotSeen) {
+			player.sendOverlayMessage(Component.translatable("message.sodcraft.headshot"));
+		} else if (armoredSeen) {
+			player.sendOverlayMessage(Component.translatable("message.sodcraft.armored"));
 		}
 
 		alertHorde(level, player);
@@ -121,6 +143,37 @@ public class GunItem extends Item {
 		}
 
 		player.getCooldowns().addCooldown(gun, stats.fireDelay());
+	}
+
+	/** One bullet or pellet. 0 = nothing alive hit, 1 = hit, 2 = headshot, 3 = headshot stopped by a helmet. */
+	private int pellet(final ServerLevel level, final Player player, final Vec3 eye, final Vec3 look) {
+		RandomSource random = player.getRandom();
+		double s = Math.toRadians(stats.spread());
+		Vec3 dir = look.add((random.nextDouble() - 0.5) * s, (random.nextDouble() - 0.5) * s, (random.nextDouble() - 0.5) * s).normalize();
+		Vec3 end = eye.add(dir.scale(stats.range()));
+		BlockHitResult block = level.clip(new ClipContext(eye, end, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, player));
+		if (block.getType() != HitResult.Type.MISS) {
+			end = block.getLocation();
+		}
+
+		EntityHitResult hit = ProjectileUtil.getEntityHitResult(level, player, eye, end, player.getBoundingBox().expandTowards(dir.scale(stats.range())).inflate(1.0),
+			e -> e instanceof LivingEntity && e.isAlive() && !e.isSpectator() && e.isPickable() && e != player, 0.3F);
+		Vec3 impact = hit != null ? hit.getLocation() : end;
+		tracer(level, eye.add(dir.scale(1.2)), impact);
+		if (hit != null && hit.getEntity() instanceof LivingEntity target) {
+			boolean headshot = impact.y >= target.getEyeY() - 0.3;
+			boolean helmet = headshot && target instanceof ArmoredZombie; // the riot helmet takes it
+			target.damageCooldownTime = 0; // fast fire and pellets land inside the usual hurt cooldown
+			target.hurtServer(level, level.damageSources().playerAttack(player), headshot && !helmet ? (float) (stats.damage() * HEADSHOT) : stats.damage());
+			level.sendParticles(ParticleTypes.CRIT, impact.x, impact.y, impact.z, headshot ? 10 : 4, 0.1, 0.1, 0.1, 0.2);
+			return helmet ? 3 : headshot ? 2 : 1;
+		}
+
+		if (block.getType() != HitResult.Type.MISS) {
+			level.sendParticles(ParticleTypes.POOF, impact.x, impact.y, impact.z, 2, 0.05, 0.05, 0.05, 0.01);
+		}
+
+		return 0;
 	}
 
 	private static void tracer(final ServerLevel level, final Vec3 from, final Vec3 to) {

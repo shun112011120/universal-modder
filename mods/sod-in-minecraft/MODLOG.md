@@ -72,6 +72,21 @@ Journal for the mod. It becomes the field note at the end (`um kb new`).
 `/gamemode survival @s`. Right-click shoots, crouch + right-click reloads. Shoot near zombies: they all turn on you.
 Then the Plague Heart test again (place it, `/time set night`).
 
+## v0.4.0: SoD2's own guns, rendered from the owner's install
+- Converter: `tools/sod2pak.py` (SoD2 paks: custom v3 0x10003, plain index, raw LZ4 = method 0x103),
+  `tools/sod2tex.py` (headerless BC1/BC3 `.hirez.ubulk` top mips), UE Viewer `-game=sod2` for skeletal meshes
+  (object version 506, licensee 7; plain ue4.x tags fail), `tools/sod2_import.py` (14 guns -> local resource pack
+  "SoD2 Assets" in the game dir, turned on in options.txt; `--preview` renders a contact sheet).
+- 14 guns: M1911, Glock 17, M9, .44 revolver, 870, AA-12, AR-15, AK-47, SCAR-H, M14, Model 70, .50 bolt, MP5,
+  Thompson. Calibres: .45, 9mm, .44, 12ga, 5.56, 7.62, .308, .30-06, .50. Shotguns fire 8 pellets; AA-12, AR-15,
+  AK-47, SCAR-H, MP5 and Thompson are full-auto (hold right-click).
+- Renderer: special item model `sodcraft:sod2_mesh` (registered through an accessor mixin on
+  SpecialModelRenderers.ID_MAPPER); triangles submitted as degenerate quads with `submitCustomGeometry` and
+  `RenderTypes.entityCutout(<SoD2 texture>)`. Without the pack, items fall back to the placeholder sprites.
+- Known gaps: magazines and attachments live in SoD2's Mods_Depot and aren't attached yet (AR-15, AK-47, AA-12,
+  M14, MP5 show without a magazine); hand/GUI transforms are first guesses, to tune in game; Minecraft lighting,
+  not SoD2's PBR (normal/specular maps are unused).
+
 ## v0.3.0: SoD2's zombie types and blood plague
 - `SodZombie` base: no daylight burning, no drowned conversion, never babies, no vanilla reinforcements; plague
   variants give blood plague on hit.
