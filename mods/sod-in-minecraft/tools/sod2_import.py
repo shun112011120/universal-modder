@@ -147,16 +147,19 @@ def write_mesh(path, verts, idx):
 
 
 def display(length):
-    """Hand/GUI transforms for a gun `length` item-space units long (muzzle +x)."""
-    gui = round(min(1.0, 0.95 / length), 3)
-    held = round(min(0.85, 0.85 / max(length, 0.85)) * 1.0, 3)
+    """Hand/GUI transforms for a gun `length` item-space units long (muzzle +x). Tuned in game (26.3): rotating +90
+    about y points the muzzle away from the camera; long guns show bigger than pistols, but not in proportion."""
+    shown = 0.6 * (length / 0.84) ** 0.6  # on-screen length: pistol 0.6, rifle ~1.3
+    held = round(shown / length, 3)
+    gui = round(min(2.0, 1.6 / length), 3)
+    lift = 1.0 if length > 1.5 else 0.0
     return {
-        "thirdperson_righthand": {"rotation": [0, -90, 0], "translation": [0, 2.5, 1.5], "scale": [held, held, held]},
-        "thirdperson_lefthand": {"rotation": [0, 90, 0], "translation": [0, 2.5, 1.5], "scale": [held, held, held]},
-        "firstperson_righthand": {"rotation": [0, -95, 5], "translation": [1.5, 3.0, -1.0], "scale": [held, held, held]},
-        "firstperson_lefthand": {"rotation": [0, 85, -5], "translation": [1.5, 3.0, -1.0], "scale": [held, held, held]},
+        "thirdperson_righthand": {"rotation": [0, 90, 0], "translation": [0, 2.5, 1.0], "scale": [held, held, held]},
+        "thirdperson_lefthand": {"rotation": [0, 90, 0], "translation": [0, 2.5, 1.0], "scale": [held, held, held]},
+        "firstperson_righthand": {"rotation": [0, 90, 0], "translation": [-1.5, 2.2 + lift, 0], "scale": [held, held, held]},
+        "firstperson_lefthand": {"rotation": [0, 90, 0], "translation": [-1.5, 2.2 + lift, 0], "scale": [held, held, held]},
         "gui": {"rotation": [0, 0, 35], "translation": [0, 0, 0], "scale": [gui, gui, gui]},
-        "ground": {"rotation": [0, 0, 0], "translation": [0, 2, 0], "scale": [0.5, 0.5, 0.5]},
+        "ground": {"rotation": [0, 0, 0], "translation": [0, 2, 0], "scale": [held, held, held]},
         "fixed": {"rotation": [0, 0, 0], "translation": [0, 0, 0], "scale": [gui, gui, gui]},
     }
 
@@ -173,8 +176,9 @@ def write_pack(guns):
         (a / "textures/sod2").mkdir(parents=True, exist_ok=True)
         (a / "textures/sod2" / f"{gun_id}.png").write_bytes(tex.read_bytes())
         (a / "models/item").mkdir(parents=True, exist_ok=True)
+        # particle: a sprite that's in the item atlas (the SoD2 textures aren't stitched into it)
         (a / "models/item" / f"{gun_id}_sod2.json").write_text(json.dumps({
-            "textures": {"particle": f"sodcraft:sod2/{gun_id}"}, "display": display(length)}, indent=1))
+            "textures": {"particle": "sodcraft:item/" + ("pistol" if length < 1.5 else "rifle")}, "display": display(length)}, indent=1))
         (a / "items").mkdir(parents=True, exist_ok=True)
         (a / "items" / f"{gun_id}.json").write_text(json.dumps({"model": {
             "type": "minecraft:special", "base": f"sodcraft:item/{gun_id}_sod2",
